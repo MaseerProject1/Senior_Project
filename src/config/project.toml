@@ -1,0 +1,93 @@
+[project]
+name = "NYC Taxi Demand Pressure Forecasting"
+random_state = 42
+timezone = "America/New_York"
+
+[paths]
+raw_data_dir = "data/raw"
+external_data_dir = "data/external"
+interim_data_dir = "data/interim"
+processed_data_dir = "data/processed"
+reports_dir = "reports"
+artifacts_dir = "artifacts"
+
+[data]
+default_start_month = "2024-01"
+default_end_month = "2024-03"
+max_rows_per_file = 300000
+max_training_rows = 80000
+zone_geometry_url = "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zones.zip"
+min_trip_minutes = 1
+max_trip_minutes = 180
+min_trip_distance = 0.05
+max_trip_distance = 80.0
+min_fare_amount = 0.0
+max_fare_amount = 500.0
+min_total_amount = 0.0
+max_total_amount = 600.0
+min_passenger_count = 0
+max_passenger_count = 6
+
+[features]
+aggregation_frequency = "1h"
+history_window = 24
+seasonal_lag = 168
+rolling_windows = [3, 6, 24, 168]
+
+[splits]
+train_fraction = 0.70
+validation_fraction = 0.15
+test_fraction = 0.15
+
+[cross_validation]
+n_splits = 3
+
+[context.weather]
+enabled = true
+source = "open-meteo"
+cache_enabled = true
+latitude = 40.7128
+longitude = -74.0060
+timezone = "America/New_York"
+archive_url = "https://archive-api.open-meteo.com/v1/archive"
+
+[context.events]
+enabled = true
+cache_enabled = true
+collision_url = "https://data.cityofnewyork.us/resource/h9gi-nx95.csv"
+major_events_path = "data/external/events/major_events.csv"
+road_closures_path = "data/external/events/road_closures.csv"
+
+[models.tabular]
+linear_regression = true
+ridge = true
+ridge_ablation = true
+random_forest = true
+gradient_boosting = true
+xgboost = true
+
+[models.sequence]
+enabled = true
+epochs = 6
+batch_size = 256
+learning_rate = 0.001
+hidden_size = 48
+num_layers = 1
+dropout = 0.10
+patience = 3
+
+[models.forecasting]
+enabled = true
+history_window = 48
+horizon = 24
+max_sequences = 40000
+epochs = 8
+batch_size = 256
+learning_rate = 0.001
+hidden_size = 64
+num_layers = 1
+dropout = 0.10
+tcn_channels = 64
+tcn_kernel_size = 3
+patience = 3
+baseline_min_denominator = 1.0

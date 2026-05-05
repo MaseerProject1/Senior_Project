@@ -1,0 +1,2 @@
+model_name,model_family,validation_mae,validation_rmse,validation_r2,validation_smape,test_mae,test_rmse,test_r2,test_smape
+GRU Sequence,sequence,,,,,0.761056865658978,2.102402583308382,0.8670009424487212,169.5814923225152

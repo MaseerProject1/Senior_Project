@@ -1,0 +1,43 @@
+{
+  "raw_rows": 900000,
+  "duplicates_removed": 0,
+  "invalid_timestamp_rows": 0,
+  "source_month_mismatch_rows": 6,
+  "invalid_zone_rows": 0,
+  "outlier_rows_removed": 92662,
+  "outliers_by_reason": {
+    "trip_duration_below_min": 10288,
+    "trip_duration_above_max": 574,
+    "trip_distance_below_min": 22129,
+    "trip_distance_above_max": 27,
+    "fare_amount_outside_range": 12812,
+    "total_amount_outside_range": 10980,
+    "passenger_count_outside_range": 68516,
+    "missing_pickup_or_dropoff_zone": 0
+  },
+  "clean_rows": 807332,
+  "row_count_before_cleaning": 900000,
+  "row_count_after_cleaning": 807332,
+  "cleaning_thresholds": {
+    "trip_duration_minutes": [
+      1.0,
+      180.0
+    ],
+    "trip_distance": [
+      0.05,
+      80.0
+    ],
+    "fare_amount": [
+      0.0,
+      500.0
+    ],
+    "total_amount": [
+      0.0,
+      600.0
+    ],
+    "passenger_count": [
+      0.0,
+      6.0
+    ]
+  }
+}

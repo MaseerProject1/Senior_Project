@@ -1,0 +1,41 @@
+Analyze the repository exactly as it exists on disk. Read and ground every claim in the current contents of:
+
+- README.md
+- docs/*
+- notebooks/*
+- src/*
+- reports/*
+- artifacts/*
+
+Produce a complete academic-style report about the project in its current implemented state. Do not write a generic report. Base the report on the real repository structure, saved artifacts, saved figures, documented methodology, and actual code paths.
+
+The report must explicitly discuss:
+
+1. The waiting-time proxy:
+why direct passenger waiting time is unavailable in NYC TLC yellow taxi data, the exact target used instead, and how the dashboard’s demand-pressure ratio should be interpreted.
+
+2. The unified eight-model comparison:
+Seasonal Naive, Ridge Regression, Random Forest, Gradient Boosting, XGBoost, LSTM, GRU, and Temporal CNN.
+
+3. Fairness of the comparison:
+show that all eight models are trained from the same underlying processed dataset version, use the same target definition, and follow the same chronological split policy. Explain how sequence models use windows derived from the same feature table.
+
+4. Contextual data integration:
+describe the weather pipeline, the event/incident pipeline, the exact contextual features added, and the optional-fallback behavior when contextual data is missing.
+
+5. Before/after contextual comparison:
+compare the base feature set versus the contextual feature set and explain which models benefited most from weather and event signals.
+
+6. Evaluation methodology:
+describe the time-series-safe validation strategy, the use of chronological train/validation/test splits and TimeSeriesSplit or walk-forward validation, and the reported metrics MAE, RMSE, and R².
+
+7. Interpretability:
+analyze the saved feature-importance outputs, especially weather and event feature impacts, contextual ranking, and any saved zone sensitivity figure.
+
+8. Dashboard and heatmap:
+explain the Streamlit dashboard, contextual panels, demand-vs-weather and demand-vs-event views, and the heatmap toggle modes.
+
+9. Reproducibility:
+document the seed handling, artifact outputs, report tables, and how a reader can rerun the pipeline from repository root.
+
+Use file references when possible. If some expected artifact is missing, state that clearly instead of inventing it.

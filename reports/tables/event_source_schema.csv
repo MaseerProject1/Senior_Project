@@ -1,0 +1,9 @@
+column,dtype,missing_count
+collision_id,int64,0
+crash_date,object,0
+crash_time,object,0
+latitude,float64,1347
+longitude,float64,1347
+borough,object,7032
+number_of_persons_injured,int64,0
+number_of_persons_killed,int64,0

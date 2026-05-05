@@ -1,0 +1,33 @@
+{
+  "source_path": "C:\\Users\\RDP\\Downloads\\final_project-20260426T150350Z-3-001\\final_project\\data\\external\\events\\collisions_20240101_20240331.csv",
+  "row_count": 22244,
+  "columns": [
+    "collision_id",
+    "crash_date",
+    "crash_time",
+    "latitude",
+    "longitude",
+    "borough",
+    "number_of_persons_injured",
+    "number_of_persons_killed"
+  ],
+  "missing_values": {
+    "collision_id": 0,
+    "crash_date": 0,
+    "crash_time": 0,
+    "latitude": 1347,
+    "longitude": 1347,
+    "borough": 7032,
+    "number_of_persons_injured": 0,
+    "number_of_persons_killed": 0
+  },
+  "available_location_fields": [
+    "latitude",
+    "longitude",
+    "borough"
+  ],
+  "available_datetime_fields": [
+    "crash_date",
+    "crash_time"
+  ]
+}

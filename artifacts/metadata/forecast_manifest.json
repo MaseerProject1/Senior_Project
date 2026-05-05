@@ -1,0 +1,20 @@
+{
+  "models": [
+    {
+      "model_name": "LSTM 24H Forecaster",
+      "model_type": "lstm",
+      "path": "C:\\Users\\RDP\\Downloads\\final_project-20260426T150350Z-3-001\\final_project\\artifacts\\models\\lstm_24h_forecaster.pt"
+    },
+    {
+      "model_name": "GRU 24H Forecaster",
+      "model_type": "gru",
+      "path": "C:\\Users\\RDP\\Downloads\\final_project-20260426T150350Z-3-001\\final_project\\artifacts\\models\\gru_24h_forecaster.pt"
+    },
+    {
+      "model_name": "Temporal CNN 24H Forecaster",
+      "model_type": "temporal_cnn",
+      "path": "C:\\Users\\RDP\\Downloads\\final_project-20260426T150350Z-3-001\\final_project\\artifacts\\models\\temporal_cnn_24h_forecaster.pt"
+    }
+  ],
+  "best_forecast_model": "GRU 24H Forecaster"
+}

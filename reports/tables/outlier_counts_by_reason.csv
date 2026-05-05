@@ -1,0 +1,9 @@
+reason,rows_removed
+trip_duration_below_min,10288
+trip_duration_above_max,574
+trip_distance_below_min,22129
+trip_distance_above_max,27
+fare_amount_outside_range,12812
+total_amount_outside_range,10980
+passenger_count_outside_range,68516
+missing_pickup_or_dropoff_zone,0

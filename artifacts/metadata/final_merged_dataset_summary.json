@@ -1,0 +1,87 @@
+{
+  "rows": 485615,
+  "columns": 65,
+  "time_range_start": "2024-01-08 00:00:00",
+  "time_range_end": "2024-03-31 22:00:00",
+  "number_of_zones": 241,
+  "target_column": "target_pickup_count_next_hour",
+  "feature_groups": {
+    "taxi_demand_features": [
+      "pickup_count",
+      "mean_trip_distance",
+      "mean_total_amount",
+      "mean_fare_amount",
+      "mean_duration_minutes",
+      "median_duration_minutes",
+      "mean_passenger_count",
+      "unique_dropoff_zones",
+      "hour",
+      "day_of_week",
+      "day_of_month",
+      "month",
+      "week_of_year",
+      "is_weekend",
+      "is_holiday",
+      "is_rush_hour",
+      "hour_sin",
+      "hour_cos",
+      "day_of_week_sin",
+      "day_of_week_cos"
+    ],
+    "taxi_zone_lookup_features": [
+      "borough",
+      "service_zone",
+      "zone_name",
+      "zone_id"
+    ],
+    "weather_features": [
+      "temperature",
+      "precipitation",
+      "snowfall",
+      "wind_speed",
+      "humidity",
+      "weather_category",
+      "rain_indicator",
+      "heavy_rain_indicator",
+      "snowfall_indicator",
+      "weather_available"
+    ],
+    "event_incident_features": [
+      "event_active",
+      "event_flag",
+      "event_intensity",
+      "event_intensity_score",
+      "zone_incident_count",
+      "citywide_incident_count",
+      "incident_flag",
+      "accident_flag",
+      "road_disruption_flag",
+      "road_closure_flag",
+      "disruption_score",
+      "event_mapping_quality"
+    ],
+    "lag_rolling_calendar_features": [
+      "pickup_count_lag_1",
+      "pickup_count_lag_2",
+      "pickup_count_lag_3",
+      "pickup_count_lag_24",
+      "pickup_count_lag_168",
+      "pickup_count_roll_mean_3",
+      "pickup_count_roll_mean_6",
+      "pickup_count_roll_mean_24",
+      "pickup_count_roll_std_24",
+      "pickup_count_roll_mean_168",
+      "pickup_count_roll_std_168"
+    ],
+    "interaction_features": [
+      "rain_x_rush_hour",
+      "snow_x_zone_demand",
+      "event_x_baseline_demand",
+      "accident_x_pickup_pressure"
+    ],
+    "target": [
+      "target_pickup_count_next_hour"
+    ]
+  },
+  "merge_summary": "Final model-ready zone-hour dataset combining aggregated TLC yellow taxi demand, TLC taxi-zone lookup fields, weather context, event/incident context, lag/rolling features, calendar variables, interactions, and the next-hour pickup-count target."
+}

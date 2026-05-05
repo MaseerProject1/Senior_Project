@@ -1,0 +1,7 @@
+{
+  "best_contextual_model": "XGBoost",
+  "best_tabular_model": "XGBoost",
+  "eight_model_comparison_complete": true,
+  "forecast_24h_trained": true,
+  "best_forecast_model": "GRU 24H Forecaster"
+}

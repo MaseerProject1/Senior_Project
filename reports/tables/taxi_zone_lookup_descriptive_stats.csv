@@ -1,0 +1,2 @@
+dataset,column,count,mean,std,min,25%,50%,75%,max
+Taxi Zone Lookup,LocationID,265.0,133.0,76.643112323722,1.0,67.0,133.0,199.0,265.0

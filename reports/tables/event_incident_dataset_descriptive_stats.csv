@@ -1,0 +1,13 @@
+dataset,column,count,mean,std,min,25%,50%,75%,max
+Event Incident Dataset,zone_id,526344.0,134.2033195020747,77.43415842660549,1.0,66.0,137.0,202.0,265.0
+Event Incident Dataset,event_active,526344.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Event Incident Dataset,event_flag,526344.0,0.03751918897147113,0.19003043976872766,0.0,0.0,0.0,0.0,1.0
+Event Incident Dataset,event_intensity,526344.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Event Incident Dataset,event_intensity_score,526344.0,0.10541774960862098,0.66432649026752,0.0,0.0,0.0,0.0,24.0
+Event Incident Dataset,zone_incident_count,526344.0,0.037657881537549585,0.19854538503608996,0.0,0.0,0.0,0.0,4.0
+Event Incident Dataset,citywide_incident_count,526344.0,0.028732159956226345,0.23020203951844467,0.0,0.0,0.0,0.0,6.0
+Event Incident Dataset,incident_flag,526344.0,0.03751918897147113,0.19003043976872766,0.0,0.0,0.0,0.0,1.0
+Event Incident Dataset,accident_flag,526344.0,0.03751918897147113,0.19003043976872766,0.0,0.0,0.0,0.0,1.0
+Event Incident Dataset,road_disruption_flag,526344.0,0.03751918897147113,0.19003043976872766,0.0,0.0,0.0,0.0,1.0
+Event Incident Dataset,road_closure_flag,526344.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+Event Incident Dataset,disruption_score,526344.0,0.1429369385800921,0.824843476986921,0.0,0.0,0.0,0.0,25.0

@@ -1,0 +1,20 @@
+{
+  "total_raw_event_records": 22244,
+  "invalid_timestamp_records_dropped": 0,
+  "records_after_timestamp_cleaning": 22244,
+  "records_with_latitude_longitude": 20897,
+  "records_mapped_to_taxi_zones": 20818,
+  "records_not_mapped": 1426,
+  "citywide_only_records": 1426,
+  "unique_mapped_zones": 257,
+  "event_active_hours": 2165,
+  "citywide_fallback_used": true,
+  "number_of_event_feature_rows": 526344,
+  "event_feature_rows_with_event_flag": 19748,
+  "event_feature_rows_with_incident_flag": 19748,
+  "percentage_final_rows_event_flag_1": 3.7805669100007204,
+  "percentage_final_rows_incident_flag_1": 3.7805669100007204,
+  "number_of_final_merged_rows": 485615,
+  "final_merged_rows_with_event_flag": 18359,
+  "final_merged_rows_with_incident_flag": 18359
+}
