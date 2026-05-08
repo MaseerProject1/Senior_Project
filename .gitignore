@@ -1,11 +1,27 @@
-venv/
-.venv/
-env/
-.env/
+﻿# Node / React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Python
 __pycache__/
-*.pyc
-.ipynb_checkpoints
+*.py[cod]
 .pytest_cache/
-pytest-cache-files-*/
+.venv/
+venv/
+env/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Matplotlib local config
 .mplconfig/
-streamlit_*.log

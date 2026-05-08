@@ -1,0 +1,18 @@
+{
+  "project_name": "MASEER",
+  "subtitle": "NYC Taxi Demand Pressure Forecasting",
+  "target": "target_pickup_count_next_hour",
+  "target_definition": "Next-hour yellow taxi pickup count by NYC TLC taxi zone.",
+  "proxy_note": "Proxy measure; NYC TLC data does not provide a direct passenger waiting-time label.",
+  "best_tabular_model": "XGBoost",
+  "best_forecast_model": "GRU 24H Forecaster",
+  "best_test_mae": 0.541201885813283,
+  "best_test_rmse": 1.5514877188000396,
+  "best_test_r2": 0.8757186103026541,
+  "data_sources": [
+    "NYC TLC Yellow Trip Data",
+    "Taxi Zone Lookup",
+    "Weather",
+    "Event/Incident Data"
+  ]
+}

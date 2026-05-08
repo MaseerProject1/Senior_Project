@@ -1,0 +1,34 @@
+[
+  {
+    "model_name": "LSTM 24H Forecaster",
+    "benchmark_name": "Previous 24 Hours Naive",
+    "mae": 0.645872175693512,
+    "rmse": 1.940353322938254,
+    "r2": 0.796035885810852,
+    "smape": 136.56439208984375
+  },
+  {
+    "model_name": "GRU 24H Forecaster",
+    "benchmark_name": "Previous 24 Hours Naive",
+    "mae": 0.7119147777557373,
+    "rmse": 1.9265785037178085,
+    "r2": 0.798921525478363,
+    "smape": 146.00460815429688
+  },
+  {
+    "model_name": "Temporal CNN 24H Forecaster",
+    "benchmark_name": "Previous 24 Hours Naive",
+    "mae": 0.946894645690918,
+    "rmse": 2.738153430170289,
+    "r2": 0.5938301086425781,
+    "smape": 159.69786071777344
+  },
+  {
+    "model_name": "Previous 24 Hours Naive",
+    "benchmark_name": "Previous 24 Hours Naive",
+    "mae": 0.6763554811477661,
+    "rmse": 2.1355306331337163,
+    "r2": 0.7529392242431641,
+    "smape": 25.390684127807617
+  }
+]

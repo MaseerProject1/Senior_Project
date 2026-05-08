@@ -1,0 +1,41 @@
+{
+  "rows": 485615,
+  "columns": 65,
+  "number_of_zones": 241,
+  "time_range_start": "2024-01-08 00:00:00",
+  "time_range_end": "2024-03-31 22:00:00",
+  "target_column": "target_pickup_count_next_hour",
+  "feature_count": 60,
+  "available_weather_columns": [
+    "temperature",
+    "precipitation",
+    "snowfall",
+    "wind_speed",
+    "humidity",
+    "weather_category",
+    "rain_indicator",
+    "heavy_rain_indicator",
+    "snowfall_indicator",
+    "weather_available"
+  ],
+  "available_event_columns": [
+    "event_active",
+    "event_flag",
+    "event_intensity",
+    "event_intensity_score",
+    "zone_incident_count",
+    "citywide_incident_count",
+    "incident_flag",
+    "accident_flag",
+    "road_disruption_flag",
+    "road_closure_flag",
+    "disruption_score",
+    "event_mapping_quality"
+  ],
+  "data_sources": [
+    "NYC TLC Yellow Trip Data",
+    "Taxi Zone Lookup",
+    "Weather",
+    "Event/Incident Data"
+  ]
+}

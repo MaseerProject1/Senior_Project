@@ -1,0 +1,18 @@
+{
+  "zone_id": 161,
+  "zone_name": "Midtown Center",
+  "borough": "Manhattan",
+  "timestamp": "2024-03-31T22:00:00",
+  "pickup_count": 11.0,
+  "pickup_count_roll_mean_24": 10.5,
+  "target_pickup_count_next_hour": 7.0,
+  "temperature": 8.7,
+  "precipitation": 0.0,
+  "snowfall": 0.0,
+  "wind_speed": 10.3,
+  "humidity": 62.0,
+  "event_intensity_score": 0.0,
+  "disruption_score": 0.0,
+  "incident_flag": 0,
+  "road_closure_flag": 0
+}

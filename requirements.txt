@@ -17,6 +17,7 @@ gitdb==4.0.12
 GitPython==3.1.46
 idna==3.11
 iniconfig==2.3.0
+fastapi==0.116.1
 Jinja2==3.1.6
 joblib==1.5.3
 jsonschema==4.26.0
@@ -65,6 +66,7 @@ tornado==6.5.5
 typing_extensions==4.15.0
 tzdata==2026.1
 urllib3==2.6.3
+uvicorn==0.35.0
 userpath==1.9.2
 watchdog==6.0.0
 xgboost==3.1.3

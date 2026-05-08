@@ -1,0 +1,374 @@
+[
+  {
+    "column": "pickup_count",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "mean_trip_distance",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "mean_total_amount",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "mean_fare_amount",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "mean_duration_minutes",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "median_duration_minutes",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "mean_passenger_count",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "unique_dropoff_zones",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "hour",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int32",
+    "missing_count": 0
+  },
+  {
+    "column": "day_of_week",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int32",
+    "missing_count": 0
+  },
+  {
+    "column": "day_of_month",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int32",
+    "missing_count": 0
+  },
+  {
+    "column": "month",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int32",
+    "missing_count": 0
+  },
+  {
+    "column": "week_of_year",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "is_weekend",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "is_holiday",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "is_rush_hour",
+    "feature_group": "taxi_demand_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "hour_sin",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "hour_cos",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "day_of_week_sin",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "day_of_week_cos",
+    "feature_group": "taxi_demand_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "borough",
+    "feature_group": "taxi_zone_lookup_features",
+    "dtype": "object",
+    "missing_count": 2015
+  },
+  {
+    "column": "service_zone",
+    "feature_group": "taxi_zone_lookup_features",
+    "dtype": "object",
+    "missing_count": 4030
+  },
+  {
+    "column": "zone_name",
+    "feature_group": "taxi_zone_lookup_features",
+    "dtype": "object",
+    "missing_count": 2015
+  },
+  {
+    "column": "zone_id",
+    "feature_group": "taxi_zone_lookup_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "temperature",
+    "feature_group": "weather_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "precipitation",
+    "feature_group": "weather_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "snowfall",
+    "feature_group": "weather_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "wind_speed",
+    "feature_group": "weather_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "humidity",
+    "feature_group": "weather_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "weather_category",
+    "feature_group": "weather_features",
+    "dtype": "object",
+    "missing_count": 0
+  },
+  {
+    "column": "rain_indicator",
+    "feature_group": "weather_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "heavy_rain_indicator",
+    "feature_group": "weather_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "snowfall_indicator",
+    "feature_group": "weather_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "weather_available",
+    "feature_group": "weather_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_active",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_flag",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_intensity",
+    "feature_group": "event_incident_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_intensity_score",
+    "feature_group": "event_incident_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "zone_incident_count",
+    "feature_group": "event_incident_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "citywide_incident_count",
+    "feature_group": "event_incident_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "incident_flag",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "accident_flag",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "road_disruption_flag",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "road_closure_flag",
+    "feature_group": "event_incident_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "disruption_score",
+    "feature_group": "event_incident_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_mapping_quality",
+    "feature_group": "event_incident_features",
+    "dtype": "object",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_lag_1",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_lag_2",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_lag_3",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_lag_24",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_lag_168",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_mean_3",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_mean_6",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_mean_24",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_std_24",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_mean_168",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "pickup_count_roll_std_168",
+    "feature_group": "lag_rolling_calendar_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "rain_x_rush_hour",
+    "feature_group": "interaction_features",
+    "dtype": "int64",
+    "missing_count": 0
+  },
+  {
+    "column": "snow_x_zone_demand",
+    "feature_group": "interaction_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "event_x_baseline_demand",
+    "feature_group": "interaction_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "accident_x_pickup_pressure",
+    "feature_group": "interaction_features",
+    "dtype": "float64",
+    "missing_count": 0
+  },
+  {
+    "column": "target_pickup_count_next_hour",
+    "feature_group": "target",
+    "dtype": "float64",
+    "missing_count": 0
+  }
+]
