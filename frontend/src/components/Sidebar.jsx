@@ -1,4 +1,12 @@
-import { LayoutDashboard, Building2, Car, BarChart3, SlidersHorizontal, Database } from "lucide-react";
+import {
+  LayoutDashboard,
+  Building2,
+  Car,
+  BarChart3,
+  SlidersHorizontal,
+  Database,
+} from "lucide-react";
+import brandLogo from "../assets/Maseer_logo.jpg.jpg";
 
 const icons = {
   dashboard: LayoutDashboard,
@@ -9,41 +17,66 @@ const icons = {
   data: Database,
 };
 
-export default function Sidebar({ pages, activePage, setActivePage }) {
+export default function Sidebar({ pages, activePage, setActivePage, apiOnline, lastRefresh }) {
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-brand-deep to-brand-mid p-4 text-white">
-      <div className="mb-6 rounded-xl bg-white p-4 text-center">
-        <img
-          src="/maseer_logo.png"
-          alt="MASEER"
-          className="mx-auto mb-2 max-h-24 w-auto object-contain"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-          }}
-        />
-        <div className="text-lg font-bold text-brand-primary">MASEER</div>
-        <div className="text-xs text-brand-muted">NYC Taxi Demand Pressure Forecasting</div>
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-gradient-to-b from-brand-deep via-brand-deep to-[#021e19] px-3 pb-5 pt-6 text-[13px] text-white shadow-soft">
+      <div className="mb-8 rounded-xl border border-white/10 bg-brand-mid/30 px-3 py-3">
+        <div className="flex items-center gap-2">
+          <img
+            src={brandLogo}
+            alt="MASEER logo"
+            className="h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-white/20"
+          />
+          <div className="min-w-0">
+            <div className="text-[15px] font-bold tracking-wide">MASEER</div>
+            <div className="text-[10px] font-medium leading-snug text-white/80">
+              مسير — NYC demand intelligence
+            </div>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] leading-snug text-white/70">
+          Next-hour pickup demand as a waiting-pressure proxy (TLC zone level).
+        </p>
       </div>
-      <nav className="space-y-2">
+
+      <nav className="flex flex-1 flex-col gap-1">
         {pages.map((page) => {
           const Icon = icons[page.id] ?? LayoutDashboard;
           const active = activePage === page.id;
           return (
             <button
               key={page.id}
+              type="button"
               onClick={() => setActivePage(page.id)}
-              className={`flex w-full items-center gap-2 rounded-full px-3 py-2 text-left text-sm ${active ? "bg-brand-mint/25 text-brand-mint" : "hover:bg-white/10"}`}
+              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left font-medium transition-colors ${
+                active
+                  ? "bg-brand-primary text-white shadow-md shadow-black/25"
+                  : "text-white/92 hover:bg-white/10 hover:text-white"
+              }`}
             >
-              <Icon size={16} />
-              {page.label}
+              <Icon size={17} strokeWidth={1.9} />
+              <span>{page.label}</span>
             </button>
           );
         })}
       </nav>
-      <div className="mt-6 space-y-2 rounded-xl bg-white/10 p-3 text-xs">
-        <div>Data Status: Ready</div>
-        <div>Mode: Frontend Demo</div>
-        <div>MASEER v1.0.0</div>
+
+      <div className="mt-4 space-y-2 rounded-xl border border-white/10 bg-brand-mid/25 p-3 text-[11px] leading-snug">
+        <div className="flex items-center gap-2 text-white">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+          <span className="font-semibold">
+            Data Status: Ready{apiOnline ? " / API Online" : ""}
+          </span>
+        </div>
+        <div className={`font-semibold ${apiOnline ? "text-emerald-300" : "text-amber-200"}`}>
+          Mode: {apiOnline ? "API Online" : "Static Fallback"}
+        </div>
+        <div className="text-[10px] text-white/65">
+          {lastRefresh ? `Last refresh: ${lastRefresh}` : "Awaiting first refresh ping."}
+        </div>
+        <div className="border-t border-white/10 pt-2 text-center text-[10px] font-semibold text-white/80">
+          MASEER v1.0.0
+        </div>
       </div>
     </aside>
   );

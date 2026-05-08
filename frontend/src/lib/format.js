@@ -24,26 +24,56 @@ export function formatDecimal(value, decimals = 2) {
 
 export function formatRatio(value) {
   if (!isValidNumber(value)) return "N/A";
-  return `${formatDecimal(value, 2)}x`;
+  const n = Number(value);
+  const d = Number.isInteger(n * 100) ? 2 : Math.min(2, (String(n).split(".")[1] || "").length);
+  const shown = Number(n.toFixed(Math.max(d, 2)));
+  return `${shown.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}×`;
 }
 
 export function formatPercent(value) {
   if (!isValidNumber(value)) return "N/A";
-  return `${formatDecimal(Number(value) * 100, 1)}%`;
+  const n = Number(value);
+  const scaled = Math.abs(n) <= 1 ? n * 100 : n;
+  return `${Number(scaled).toFixed(1)}%`;
+}
+
+export function pressureLabel(ratio) {
+  if (!isValidNumber(ratio)) return "Unavailable";
+  const r = Number(ratio);
+  if (r >= 1.35) return "High Pressure";
+  if (r >= 1.0) return "Elevated";
+  if (r >= 0.75) return "Typical";
+  return "Low";
+}
+
+export function pressureTone(ratio) {
+  if (!isValidNumber(ratio)) return "neutral";
+  const r = Number(ratio);
+  if (r >= 1.35) return "critical";
+  if (r >= 1.0) return "warning";
+  if (r >= 0.75) return "neutral";
+  return "low";
 }
 
 export function riskLabelFromRatio(ratio) {
-  if (!isValidNumber(ratio)) return "Unavailable";
-  if (Number(ratio) >= 1.35) return "High Pressure";
-  if (Number(ratio) >= 1.0) return "Elevated Pressure";
-  if (Number(ratio) >= 0.75) return "Typical Pressure";
-  return "Low Pressure";
+  return pressureLabel(ratio);
 }
 
 export function riskToneFromRatio(ratio) {
-  if (!isValidNumber(ratio)) return "neutral";
-  if (Number(ratio) >= 1.35) return "danger";
-  if (Number(ratio) >= 1.0) return "warning";
-  if (Number(ratio) >= 0.75) return "neutral";
-  return "success";
+  return pressureTone(ratio);
+}
+
+export function isoToDisplay(iso, fallback = "Latest snapshot") {
+  if (!iso || typeof iso !== "string") return fallback;
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return iso;
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZoneName: "short",
+    }).format(d);
+  } catch {
+    return d.toLocaleString();
+  }
 }

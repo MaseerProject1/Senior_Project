@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Dashboard from "./pages/Dashboard";
 import TransportAuthority from "./pages/TransportAuthority";
@@ -8,7 +7,8 @@ import RideHailingOps from "./pages/RideHailingOps";
 import ModelPerformance from "./pages/ModelPerformance";
 import SimulationLab from "./pages/SimulationLab";
 import DataInfo from "./pages/DataInfo";
-import { loadDashboardData } from "./lib/data";
+import { getHealth, getOverview } from "./lib/api";
+import { isoToDisplay } from "./lib/format";
 
 const PAGES = [
   { id: "dashboard", label: "Dashboard", component: Dashboard },
@@ -21,60 +21,54 @@ const PAGES = [
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [overview, setOverview] = useState(null);
+  const [apiOnline, setApiOnline] = useState(false);
+  const [lastRefreshDisplay, setLastRefreshDisplay] = useState("");
 
-  async function refreshData() {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await loadDashboardData();
-      setDashboardData(data);
-      if (!data?.overview) {
-        setError(
-          "Dashboard data has not been exported yet. Run: python scripts/export_dashboard_data.py"
-        );
-      }
-    } catch (err) {
-      setError(
-        "Dashboard data has not been exported yet. Run: python scripts/export_dashboard_data.py"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
+  const refreshMeta = useCallback(async () => {
+    const [health, ov] = await Promise.all([getHealth(), getOverview()]);
+    setApiOnline(!!health.ok);
+    setOverview(ov.data ?? null);
+    setLastRefreshDisplay(isoToDisplay(new Date().toISOString()));
+  }, []);
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    refreshMeta();
+  }, [refreshMeta]);
 
   const ActiveComponent = useMemo(
     () => PAGES.find((p) => p.id === activePage)?.component ?? Dashboard,
     [activePage]
   );
 
-  const latestTs =
-    dashboardData?.zonePressure?.[0]?.timestamp ?? "Exported Data Ready";
+  const pageCfg = PAGES.find((p) => p.id === activePage);
 
   return (
-    <div className="min-h-screen bg-brand-bg">
-      <Sidebar pages={PAGES} activePage={activePage} setActivePage={setActivePage} />
-      <main className="ml-64 min-h-screen p-6">
-        <Header title={PAGES.find((p) => p.id === activePage)?.label ?? "Dashboard"} subtitle={dashboardData?.overview?.subtitle} latestTs={latestTs} onRefresh={refreshData} />
-        {error ? (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
-        {loading ? (
-          <div className="rounded-xl border border-brand-border bg-white p-8 text-sm text-brand-muted">
-            Loading dashboard...
-          </div>
-        ) : (
-          <ActiveComponent data={dashboardData} />
-        )}
-        <Footer />
+    <div className="min-h-screen bg-brand-bg antialiased">
+      <Sidebar
+        pages={PAGES}
+        activePage={activePage}
+        setActivePage={setActivePage}
+        apiOnline={apiOnline}
+        lastRefresh={lastRefreshDisplay}
+      />
+      <main className="min-h-screen pl-[240px]">
+        <div
+          className={`pointer-events-none fixed right-4 top-5 z-30 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-soft ${
+            apiOnline ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"
+          }`}
+          title="Backed by GET /api/health"
+        >
+          {apiOnline ? "API Online" : "Static Demo Mode"}
+        </div>
+        <div className="mx-auto max-w-[1600px] px-5 py-7 pb-10">
+          <ActiveComponent
+            pageMeta={{ label: pageCfg?.label ?? "Dashboard", apiOnline }}
+            overview={overview}
+            refreshHealth={refreshMeta}
+          />
+          <Footer />
+        </div>
       </main>
     </div>
   );
