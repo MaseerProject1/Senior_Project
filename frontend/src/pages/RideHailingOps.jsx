@@ -35,7 +35,9 @@ import {
   formatRatio,
 } from "../lib/format";
 
-export default function RideHailingOps({ overview, refreshHealth }) {
+const LOG = "[MASEER]";
+
+export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
   const subtitle =
     "Operator-grade demand-pressure telemetry with zone drilling — still a pickup-count proxy without live idle-driver visibility.";
 
@@ -49,52 +51,93 @@ export default function RideHailingOps({ overview, refreshHealth }) {
   const [history, setHistory] = useState([]);
   const [city, setCity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchErrors, setFetchErrors] = useState({});
+
+  const allowStaticFallback = apiOnline !== true;
 
   useEffect(() => {
+    if (apiOnline === null) return;
     (async () => {
-      const [z, mm] = await Promise.all([getZones(), getModelMetrics()]);
-      setZones(z.rows ?? []);
+      const [z, mm] = await Promise.all([
+        getZones({ allowStaticFallback }),
+        getModelMetrics({ allowStaticFallback }),
+      ]);
+      if (z.ok !== false) {
+        setZones(z.rows ?? []);
+        setZoneId((prev) =>
+          prev || (z.rows?.[0]?.zone_id != null ? String(z.rows[0].zone_id) : "")
+        );
+      } else console.warn(`${LOG} ops zones:`, z.error);
+      if (mm.ok === false) {
+        console.warn(`${LOG} ops model metrics:`, mm.error);
+        return;
+      }
       const names = [...new Set((mm.data?.model_metrics ?? []).map((m) => m.model_name).filter(Boolean))];
       const opts = [...new Set([mm.data?.best_tabular_model, overview?.best_tabular_model, ...names].filter(Boolean))];
       setModels(opts);
       setModel((p) => p || String(opts[0] || ""));
-      setZoneId((prev) =>
-        prev || (z.rows?.[0]?.zone_id != null ? String(z.rows[0].zone_id) : "")
-      );
     })();
-  }, [overview?.best_tabular_model]);
+  }, [overview?.best_tabular_model, apiOnline, allowStaticFallback]);
 
   useEffect(() => {
     setTimestamp("");
   }, [zoneId]);
 
   useEffect(() => {
-    if (!zoneId) return;
+    if (apiOnline === null || !zoneId) return;
     (async () => {
-      const ts = await getTimestamps(Number(zoneId));
+      const ts = await getTimestamps(Number(zoneId), { allowStaticFallback });
+      if (ts.ok === false) {
+        console.warn(`${LOG} ops timestamps:`, ts.error);
+        return;
+      }
       const list = ts.rows ?? [];
       setTimestamps(list);
       const last = list[list.length - 1];
       if (last) setTimestamp(last);
       else setTimestamp("");
     })();
-  }, [zoneId]);
+  }, [zoneId, apiOnline, allowStaticFallback]);
 
   const load = useCallback(async () => {
+    if (apiOnline === null) return;
     setLoading(true);
     try {
       const [snap, hist, ct] = await Promise.all([
-        getDashboardSnapshot({ timestamp: timestamp || undefined, model: model || undefined }),
-        zoneId ? getZoneHistory(Number(zoneId), 72) : Promise.resolve({ rows: [] }),
-        getCityTrend(72),
+        getDashboardSnapshot({
+          timestamp: timestamp || undefined,
+          model: model || undefined,
+          allowStaticFallback,
+        }),
+        zoneId
+          ? getZoneHistory({
+              zoneId: Number(zoneId),
+              hours: 72,
+              allowStaticFallback,
+            })
+          : Promise.resolve({ ok: true, rows: [] }),
+        getCityTrend({ hours: 72, allowStaticFallback }),
       ]);
-      setSnapshot(snap.data);
-      setHistory(hist.rows ?? []);
-      setCity(ct.rows ?? []);
+      setFetchErrors((prev) => {
+        const n = { ...prev };
+        const touch = (key, res) => {
+          if (res && res.ok === false) {
+            console.warn(`${LOG} ops panel [${key}]:`, res.error);
+            n[key] = res.error || "Failed";
+          } else delete n[key];
+        };
+        touch("snapshot", snap);
+        touch("history", hist);
+        touch("city", ct);
+        return n;
+      });
+      if (snap.ok !== false) setSnapshot(snap.data);
+      if (hist.ok !== false) setHistory(hist.rows ?? []);
+      if (ct.ok !== false) setCity(ct.rows ?? []);
     } finally {
       setLoading(false);
     }
-  }, [timestamp, model, zoneId]);
+  }, [timestamp, model, zoneId, apiOnline, allowStaticFallback]);
 
   useEffect(() => {
     load();
@@ -170,6 +213,8 @@ export default function RideHailingOps({ overview, refreshHealth }) {
 
   const pressureAlertLabel = zoneRow?.pressure_label ?? pressureLabel(Number(zoneRow?.pressure_ratio));
 
+  const showBlocking = loading || apiOnline === null;
+
   return (
     <div className="space-y-5">
       <PageHeader title="Ride-Hailing Ops" subtitle={subtitle}>
@@ -195,9 +240,17 @@ export default function RideHailingOps({ overview, refreshHealth }) {
         </GlassButton>
       </PageHeader>
 
-      {loading ? (
+      {showBlocking ? (
         <div className="rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted shadow-card">
           Syncing operator snapshot…
+        </div>
+      ) : null}
+
+      {!showBlocking && (fetchErrors.snapshot || fetchErrors.history || fetchErrors.city) ? (
+        <div className="space-y-1 text-xs text-rose-600">
+          {fetchErrors.snapshot ? <p>Snapshot: {fetchErrors.snapshot}</p> : null}
+          {fetchErrors.history ? <p>Zone history: {fetchErrors.history}</p> : null}
+          {fetchErrors.city ? <p>City trend: {fetchErrors.city}</p> : null}
         </div>
       ) : null}
 

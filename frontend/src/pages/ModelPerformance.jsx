@@ -25,6 +25,8 @@ import SelectField from "../components/SelectField";
 import { getModelMetrics, getModelPredictions } from "../lib/api";
 import { formatDecimal, formatNumber } from "../lib/format";
 
+const LOG = "[MASEER]";
+
 function aggregatePredictionsByTime(rows) {
   const m = {};
   for (const r of rows ?? []) {
@@ -49,28 +51,59 @@ function aggregatePredictionsByTime(rows) {
   return out;
 }
 
-export default function ModelPerformance({ overview }) {
+export default function ModelPerformance({ overview, apiOnline }) {
   const subtitle =
     "Model cards stay tied to TLC pickup targets (`target_pickup_count_next_hour`) — error metrics summarize holdout fit, not waiting minutes.";
 
   const [metricsPack, setMetricsPack] = useState(null);
   const [predModel, setPredModel] = useState("");
   const [predictions, setPredictions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [fetchErrors, setFetchErrors] = useState({});
+
+  const allowStaticFallback = apiOnline !== true;
 
   const loadAll = async (modelKey) => {
     setLoading(true);
     try {
-      const mp = await getModelMetrics();
-      setMetricsPack(mp.data ?? null);
-      const best = mp.data?.best_tabular_model ?? overview?.best_tabular_model ?? "";
+      if (apiOnline === null) return;
+      const mp = await getModelMetrics({ allowStaticFallback });
+      if (mp.ok === false) {
+        console.warn(`${LOG} model metrics:`, mp.error);
+        setFetchErrors((e) => ({ ...e, metrics: mp.error || "Failed" }));
+      } else {
+        setFetchErrors((e) => {
+          const n = { ...e };
+          delete n.metrics;
+          return n;
+        });
+        setMetricsPack(mp.data ?? null);
+      }
+      const best =
+        (mp.ok !== false ? mp.data?.best_tabular_model : null) ??
+        overview?.best_tabular_model ??
+        "";
       const useModel =
         modelKey ||
         predModel ||
         best ||
-        (mp.data?.model_metrics?.[0]?.model_name ?? "");
-      const pr = await getModelPredictions({ model: useModel || undefined, limit: 2400 });
-      setPredictions(pr.rows ?? []);
+        (mp.ok !== false ? mp.data?.model_metrics?.[0]?.model_name ?? "" : "");
+      const pr = await getModelPredictions({
+        model: useModel || undefined,
+        limit: 2400,
+        allowStaticFallback,
+      });
+      if (pr.ok === false) {
+        console.warn(`${LOG} model predictions:`, pr.error);
+        setFetchErrors((e) => ({ ...e, predictions: pr.error || "Failed" }));
+      } else {
+        setFetchErrors((e) => {
+          const n = { ...e };
+          delete n.predictions;
+          return n;
+        });
+        setPredictions(pr.rows ?? []);
+      }
       if (!predModel && useModel) setPredModel(String(useModel));
     } finally {
       setLoading(false);
@@ -80,7 +113,9 @@ export default function ModelPerformance({ overview }) {
   useEffect(() => {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [overview?.best_tabular_model]);
+  }, [overview?.best_tabular_model, apiOnline]);
+
+  const showBlocking = loading || apiOnline === null;
 
   const modelMetrics = metricsPack?.model_metrics ?? [];
   const forecastMetrics = metricsPack?.forecast_metrics ?? [];
@@ -136,8 +171,15 @@ export default function ModelPerformance({ overview }) {
         </GlassButton>
       </PageHeader>
 
-      {loading ? (
+      {showBlocking ? (
         <div className="rounded-xl border bg-white px-4 py-3 text-sm text-brand-muted shadow-card">Refreshing metrics payloads…</div>
+      ) : null}
+
+      {!showBlocking && (fetchErrors.metrics || fetchErrors.predictions) ? (
+        <div className="space-y-1 text-xs text-rose-600">
+          {fetchErrors.metrics ? <p>Model metrics: {fetchErrors.metrics}</p> : null}
+          {fetchErrors.predictions ? <p>Predictions preview: {fetchErrors.predictions}</p> : null}
+        </div>
       ) : null}
 
       <div className="grid gap-3 xl:grid-cols-4">

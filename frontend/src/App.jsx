@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import Dashboard from "./pages/Dashboard";
@@ -7,8 +7,10 @@ import RideHailingOps from "./pages/RideHailingOps";
 import ModelPerformance from "./pages/ModelPerformance";
 import SimulationLab from "./pages/SimulationLab";
 import DataInfo from "./pages/DataInfo";
-import { getHealth, getOverview } from "./lib/api";
+import { getHealth, getOverview, logFallbackMode } from "./lib/api";
 import { isoToDisplay } from "./lib/format";
+
+const LOG = "[MASEER]";
 
 const PAGES = [
   { id: "dashboard", label: "Dashboard", component: Dashboard },
@@ -22,13 +24,39 @@ const PAGES = [
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [overview, setOverview] = useState(null);
-  const [apiOnline, setApiOnline] = useState(false);
+  /** `null` until the first `/api/health` check completes — avoids treating "unknown" as fallback. */
+  const [apiOnline, setApiOnline] = useState(null);
   const [lastRefreshDisplay, setLastRefreshDisplay] = useState("");
+  const healthRefreshGen = useRef(0);
 
   const refreshMeta = useCallback(async () => {
-    const [health, ov] = await Promise.all([getHealth(), getOverview()]);
-    setApiOnline(!!health.ok);
-    setOverview(ov.data ?? null);
+    const id = ++healthRefreshGen.current;
+
+    const health = await getHealth();
+    if (id !== healthRefreshGen.current) return;
+
+    if (health.ok) {
+      console.info(`${LOG} /api/health → OK (status=${health.status})`);
+      setApiOnline(true);
+
+      const ov = await getOverview({ allowStaticFallback: false });
+      if (id !== healthRefreshGen.current) return;
+
+      if (ov.ok !== false) {
+        setOverview(ov.data ?? null);
+      } else {
+        console.warn(`${LOG} /api/overview failed while API is online; keeping prior overview if any.`, ov.error ?? "");
+      }
+    } else {
+      console.warn(`${LOG} /api/health → FAIL (status=${health.status})`);
+      setApiOnline(false);
+      logFallbackMode(`/api/health did not succeed (status=${health.status}); loading exported JSON snapshots.`);
+
+      const ov = await getOverview({ allowStaticFallback: true });
+      if (id !== healthRefreshGen.current) return;
+      setOverview(ov.data ?? null);
+    }
+
     setLastRefreshDisplay(isoToDisplay(new Date().toISOString()));
   }, []);
 
@@ -43,6 +71,9 @@ export default function App() {
 
   const pageCfg = PAGES.find((p) => p.id === activePage);
 
+  const badgeApi = apiOnline === true;
+  const badgeFallback = apiOnline === false;
+
   return (
     <div className="min-h-screen bg-brand-bg antialiased">
       <Sidebar
@@ -55,17 +86,22 @@ export default function App() {
       <main className="min-h-screen pl-[240px]">
         <div
           className={`pointer-events-none fixed right-4 top-5 z-30 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-soft ${
-            apiOnline ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-900"
+            badgeApi
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : badgeFallback
+                ? "border-amber-200 bg-amber-50 text-amber-900"
+                : "border-slate-200 bg-slate-50 text-slate-700"
           }`}
           title="Backed by GET /api/health"
         >
-          {apiOnline ? "API Online" : "Static Demo Mode"}
+          {apiOnline === null ? "Checking API…" : badgeApi ? "API Online" : "Exported Data Fallback"}
         </div>
         <div className="mx-auto max-w-[1600px] px-5 py-7 pb-10">
           <ActiveComponent
             pageMeta={{ label: pageCfg?.label ?? "Dashboard", apiOnline }}
             overview={overview}
             refreshHealth={refreshMeta}
+            apiOnline={apiOnline}
           />
           <Footer />
         </div>

@@ -8,6 +8,8 @@ import GlassButton from "../components/GlassButton";
 import { getDataInfo, getFigures } from "../lib/api";
 import { formatNumber } from "../lib/format";
 
+const LOG = "[MASEER]";
+
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "quality", label: "Data Quality" },
@@ -25,7 +27,7 @@ const PIPE = [
   { title: "Dashboard", body: "Proxy visualization & API layering", Icon: Table2 },
 ];
 
-export default function DataInfo({ refreshHealth }) {
+export default function DataInfo({ refreshHealth, apiOnline }) {
   const subtitle =
     "Traceability for `target_pickup_count_next_hour` across curated TLC merges — every metric remains a pickup proxy.";
 
@@ -34,23 +36,39 @@ export default function DataInfo({ refreshHealth }) {
   const [figures, setFigures] = useState([]);
   const [featQ, setFeatQ] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchErrors, setFetchErrors] = useState({});
 
   const load = async () => {
+    if (apiOnline === null) return;
+    const allowStaticFallback = apiOnline !== true;
     setLoading(true);
     try {
-      const [di, fg] = await Promise.all([getDataInfo(), getFigures()]);
+      const [di, fg] = await Promise.all([
+        getDataInfo({ allowStaticFallback }),
+        getFigures({ allowStaticFallback }),
+      ]);
       setBundle(di.data ?? null);
-      setFigures(fg.rows ?? []);
+      const nextErr = {};
+      if (di.ok === false) {
+        const parts = [di.errors?.overview, di.errors?.modelMetrics].filter(Boolean).join(" • ");
+        console.warn(`${LOG} data info partial failure:`, parts || "overview or model metrics");
+        nextErr.dataInfo = parts || "Some API slices failed; static files still shown where available.";
+      }
+      if (fg.ok === false) {
+        console.warn(`${LOG} figures:`, fg.error);
+        nextErr.figures = fg.error || "Figures API failed";
+      }
+      setFetchErrors(nextErr);
+      if (fg.ok !== false) setFigures(fg.rows ?? []);
     } finally {
       setLoading(false);
-      refreshHealth?.();
     }
   };
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [apiOnline]);
 
   const ds = bundle?.dataset_summary ?? {};
   const feats = bundle?.feature_dictionary ?? [];
@@ -76,9 +94,9 @@ export default function DataInfo({ refreshHealth }) {
       <PageHeader title="Data Info" subtitle={subtitle}>
         <GlassButton
           variant="primary"
-          onClick={() => {
-            load();
-            refreshHealth?.();
+          onClick={async () => {
+            await refreshHealth?.();
+            await load();
           }}
         >
           <RefreshCcw size={16} strokeWidth={1.75} />
@@ -86,8 +104,15 @@ export default function DataInfo({ refreshHealth }) {
         </GlassButton>
       </PageHeader>
 
-      {loading ? (
+      {loading || apiOnline === null ? (
         <div className="rounded-xl border bg-white px-4 py-3 text-sm text-brand-muted shadow-card">Refreshing metadata…</div>
+      ) : null}
+
+      {fetchErrors.dataInfo || fetchErrors.figures ? (
+        <div className="space-y-1 text-xs text-rose-600">
+          {fetchErrors.dataInfo ? <p>{fetchErrors.dataInfo}</p> : null}
+          {fetchErrors.figures ? <p>Figures: {fetchErrors.figures}</p> : null}
+        </div>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

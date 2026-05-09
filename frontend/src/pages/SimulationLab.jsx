@@ -25,15 +25,19 @@ import {
   Legend,
 } from "recharts";
 
+const LOG = "[MASEER]";
+
 function num(val) {
   if (val === "" || val === null || val === undefined) return null;
   const n = Number(val);
   return Number.isFinite(n) ? n : null;
 }
 
-export default function SimulationLab({ overview, refreshHealth }) {
+export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
   const subtitle =
     "Counterfactual weather, disruption, and rolling-demand inputs re-score the next-hour pickup proxy for a single zone — no passenger waiting-time targets.";
+
+  const allowStaticFallback = apiOnline !== true;
 
   const [zones, setZones] = useState([]);
   const [models, setModels] = useState([]);
@@ -54,41 +58,60 @@ export default function SimulationLab({ overview, refreshHealth }) {
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
+    if (apiOnline === null) return;
     (async () => {
-      const [z, mm] = await Promise.all([getZones(), getModelMetrics()]);
-      setZones(z.rows ?? []);
+      const [z, mm] = await Promise.all([
+        getZones({ allowStaticFallback }),
+        getModelMetrics({ allowStaticFallback }),
+      ]);
+      if (z.ok !== false) {
+        setZones(z.rows ?? []);
+        setZoneId((prev) =>
+          prev || (z.rows?.[0]?.zone_id != null ? String(z.rows[0].zone_id) : "")
+        );
+      } else console.warn(`${LOG} simulation zones:`, z.error);
+      if (mm.ok === false) {
+        console.warn(`${LOG} simulation model metrics:`, mm.error);
+        return;
+      }
       const names = [...new Set((mm.data?.model_metrics ?? []).map((m) => m.model_name).filter(Boolean))];
       const opts = [...new Set([mm.data?.best_tabular_model, overview?.best_tabular_model, ...names].filter(Boolean))];
       setModels(opts);
       setModel((p) => p || String(opts[0] || ""));
-      setZoneId((prev) =>
-        prev || (z.rows?.[0]?.zone_id != null ? String(z.rows[0].zone_id) : "")
-      );
     })();
-  }, [overview?.best_tabular_model]);
+  }, [overview?.best_tabular_model, apiOnline, allowStaticFallback]);
 
   useEffect(() => {
     setTimestamp("");
   }, [zoneId]);
 
   useEffect(() => {
-    if (!zoneId) return;
+    if (apiOnline === null || !zoneId) return;
     (async () => {
-      const ts = await getTimestamps(Number(zoneId));
+      const ts = await getTimestamps(Number(zoneId), { allowStaticFallback });
+      if (ts.ok === false) {
+        console.warn(`${LOG} simulation timestamps:`, ts.error);
+        return;
+      }
       const list = ts.rows ?? [];
       setTimestamps(list);
       const last = list[list.length - 1];
       if (last) setTimestamp(last);
       else setTimestamp("");
     })();
-  }, [zoneId]);
+  }, [zoneId, apiOnline, allowStaticFallback]);
 
   async function hydrateFromSnapshot() {
-    if (!zoneId) return;
+    if (!zoneId || apiOnline === null) return;
     const snap = await getDashboardSnapshot({
       timestamp: timestamp || undefined,
       model: model || undefined,
+      allowStaticFallback,
     });
+    if (snap.ok === false) {
+      console.warn(`${LOG} hydrate snapshot:`, snap.error);
+      return;
+    }
     const row = (snap.data?.rows ?? []).find((r) => Number(r.zone_id) === Number(zoneId));
     if (!row) return;
     setTemperature(row.temperature != null ? String(row.temperature) : "");

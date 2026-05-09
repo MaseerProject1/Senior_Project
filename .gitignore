@@ -25,3 +25,12 @@ Thumbs.db
 
 # Matplotlib local config
 .mplconfig/
+
+# Generated dashboard data
+data/processed/dashboard_zone_hour_light.parquet
+data/processed/*.parquet
+
+
+# Local backups
+*_backup.py
+

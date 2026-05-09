@@ -46,6 +46,8 @@ import {
 import { formatDecimal, formatNumber, isoToDisplay, pressureLabel, formatRatio } from "../lib/format";
 import { buildDashboardInsightFourCards } from "../lib/insights";
 
+const LOG = "[MASEER]";
+
 const PROJECT_BLURB =
   "MASEER is an AI-driven dashboard that forecasts next-hour taxi demand pressure across NYC TLC taxi zones using taxi trip records, weather, and event/incident context. The system supports monitoring, model comparison, and scenario analysis using demand-pressure proxies.";
 
@@ -107,7 +109,7 @@ function mergeModelOptions(mmPack, overview) {
   return ordered;
 }
 
-export default function Dashboard({ overview, refreshHealth }) {
+export default function Dashboard({ overview, refreshHealth, apiOnline }) {
   const [timestamps, setTimestamps] = useState([]);
   const [models, setModels] = useState([]);
   const [timestamp, setTimestamp] = useState("");
@@ -120,24 +122,37 @@ export default function Dashboard({ overview, refreshHealth }) {
   const [boroughTrend, setBoroughTrend] = useState([]);
   const [heat, setHeat] = useState([]);
   const [wxLine, setWxLine] = useState([]);
+  const [fetchErrors, setFetchErrors] = useState({});
+
+  const allowStaticFallback = apiOnline !== true;
 
   useEffect(() => {
+    if (apiOnline === null) return;
     let cancel = false;
     (async () => {
-      const tsRes = await getTimestamps(null, { maxTimestamps: 0 });
+      const tsRes = await getTimestamps(null, { maxTimestamps: 0, allowStaticFallback });
       if (cancel) return;
+      if (tsRes.ok === false) {
+        console.warn(`${LOG} timestamps list failed:`, tsRes.error ?? "");
+        return;
+      }
       setTimestamps(tsRes.rows ?? []);
     })();
     return () => {
       cancel = true;
     };
-  }, []);
+  }, [apiOnline, allowStaticFallback]);
 
   useEffect(() => {
+    if (apiOnline === null) return;
     let cancel = false;
     (async () => {
-      const mm = await getModelMetrics();
+      const mm = await getModelMetrics({ allowStaticFallback });
       if (cancel) return;
+      if (mm.ok === false) {
+        console.warn(`${LOG} model metrics failed (model list):`, mm.error ?? "");
+        return;
+      }
       const opts = mergeModelOptions(mm.data, overview);
       setModels(opts);
       setModel((prev) => prev || String(opts[0] || ""));
@@ -145,31 +160,55 @@ export default function Dashboard({ overview, refreshHealth }) {
     return () => {
       cancel = true;
     };
-  }, [overview?.best_tabular_model]);
+  }, [overview?.best_tabular_model, apiOnline, allowStaticFallback]);
 
   const loadBoard = useCallback(async () => {
+    if (apiOnline === null) return;
     setLoading(true);
     try {
       const [snapRes, ct, bor, hm, wx] = await Promise.all([
-        getDashboardSnapshot({ timestamp: timestamp || undefined, model: model || undefined }),
-        getCityTrend(168),
-        getBoroughTrend(168),
-        getZoneHourHeatmap(24, 22),
-        getWeatherEventsTimeline(168),
+        getDashboardSnapshot({
+          timestamp: timestamp || undefined,
+          model: model || undefined,
+          allowStaticFallback,
+        }),
+        getCityTrend({ hours: 168, allowStaticFallback }),
+        getBoroughTrend({ hours: 168, allowStaticFallback }),
+        getZoneHourHeatmap({ hours: 24, topN: 22, allowStaticFallback }),
+        getWeatherEventsTimeline({ hours: 168, allowStaticFallback }),
       ]);
-      setSnapshot(snapRes.data);
-      setCity(ct.rows ?? []);
-      setBoroughTrend(bor.rows ?? []);
-      setHeat(hm.rows ?? []);
-      setWxLine(wx.rows ?? []);
+
+      setFetchErrors((prev) => {
+        const n = { ...prev };
+        const touch = (key, res) => {
+          if (res.ok === false) {
+            console.warn(`${LOG} dashboard panel failed [${key}]:`, res.error ?? "");
+            n[key] = res.error || "Request failed";
+          } else delete n[key];
+        };
+        touch("snapshot", snapRes);
+        touch("city", ct);
+        touch("borough", bor);
+        touch("heatmap", hm);
+        touch("weather", wx);
+        return n;
+      });
+
+      if (snapRes.ok !== false) setSnapshot(snapRes.data);
+      if (ct.ok !== false) setCity(ct.rows ?? []);
+      if (bor.ok !== false) setBoroughTrend(bor.rows ?? []);
+      if (hm.ok !== false) setHeat(hm.rows ?? []);
+      if (wx.ok !== false) setWxLine(wx.rows ?? []);
     } finally {
       setLoading(false);
     }
-  }, [timestamp, model]);
+  }, [timestamp, model, apiOnline, allowStaticFallback]);
 
   useEffect(() => {
     loadBoard();
   }, [loadBoard]);
+
+  const showBlocking = loading || apiOnline === null;
 
   const defaultTs = timestamps.length ? timestamps[timestamps.length - 1] : "";
   useEffect(() => {
@@ -464,14 +503,14 @@ export default function Dashboard({ overview, refreshHealth }) {
         </div>
       </section>
 
-      {loading ? (
+      {showBlocking ? (
         <div className="space-y-3">
           <p className="text-center text-xs font-medium text-brand-muted">Loading dashboard data…</p>
           <DashboardSkeleton />
         </div>
       ) : null}
 
-      {!loading ? (
+      {!showBlocking ? (
         <>
           {/* KPI row */}
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -545,6 +584,9 @@ export default function Dashboard({ overview, refreshHealth }) {
               title="NYC TLC zones — demand visualization"
               subtitle={`Colored by ${PRESSURE_VIEWS.find((p) => p.value === pressureView)?.label ?? "pressure"} • Model ${model || snapshot?.model_name || "—"}`}
             >
+              {fetchErrors.snapshot ? (
+                <p className="mb-2 text-xs text-rose-600">Could not refresh snapshot from API: {fetchErrors.snapshot}</p>
+              ) : null}
               <ZoneDemandCanvas rows={filteredRows} pressureView={pressureView} boroughFilter={borough} />
             </SectionCard>
 
@@ -576,6 +618,12 @@ export default function Dashboard({ overview, refreshHealth }) {
               subtitle="Hourly city aggregates • darker area = summed next-hour proxy targets"
               className="xl:col-span-1"
             >
+              {fetchErrors.city ? (
+                <p className="mb-2 text-xs text-rose-600">Could not refresh this chart: {fetchErrors.city}</p>
+              ) : null}
+              {fetchErrors.weather ? (
+                <p className="mb-2 text-xs text-rose-600">Weather / incident strip: {fetchErrors.weather}</p>
+              ) : null}
               {cityChartThin.length >= 2 ? (
                 <>
                   <div className="h-64 w-full">
@@ -652,6 +700,9 @@ export default function Dashboard({ overview, refreshHealth }) {
               subtitle="Aligned hour when available • avg ratio or fallback mass"
               className="xl:col-span-1"
             >
+              {fetchErrors.borough ? (
+                <p className="mb-2 text-xs text-rose-600">Could not refresh this chart: {fetchErrors.borough}</p>
+              ) : null}
               {boroughBars.length ? (
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -672,6 +723,9 @@ export default function Dashboard({ overview, refreshHealth }) {
             </SectionCard>
 
             <SectionCard title="Zone-hour demand heatmap" subtitle="Top zones vs hour-of-day" className="xl:col-span-1">
+              {fetchErrors.heatmap ? (
+                <p className="mb-2 text-xs text-rose-600">Could not refresh this chart: {fetchErrors.heatmap}</p>
+              ) : null}
               <ZoneHourHeatMatrix rows={heatFiltered.length ? heatFiltered : heat} />
             </SectionCard>
           </div>

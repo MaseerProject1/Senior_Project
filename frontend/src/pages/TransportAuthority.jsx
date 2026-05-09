@@ -37,6 +37,8 @@ import {
 } from "../lib/api";
 import { formatDecimal, formatNumber, formatRatio, isoToDisplay, pressureLabel } from "../lib/format";
 
+const LOG = "[MASEER]";
+
 function peakWindow(rows, window = 3) {
   if (!rows?.length) return "N/A";
   const slice = rows.slice(-Math.min(rows.length, 168));
@@ -73,7 +75,7 @@ function latestBoroughSlice(rows) {
   return rows.filter((r) => r.timestamp === last);
 }
 
-export default function TransportAuthority({ overview, refreshHealth }) {
+export default function TransportAuthority({ overview, refreshHealth, apiOnline }) {
   const subtitle =
     "Government-style monitoring of citywide demand-pressure context, incidents, and borough-level stress — no fleet availability data.";
 
@@ -86,35 +88,66 @@ export default function TransportAuthority({ overview, refreshHealth }) {
   const [city, setCity] = useState([]);
   const [wx, setWx] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchErrors, setFetchErrors] = useState({});
+
+  const allowStaticFallback = apiOnline !== true;
 
   useEffect(() => {
+    if (apiOnline === null) return;
     (async () => {
-      const [tsRes, mm] = await Promise.all([getTimestamps(), getModelMetrics()]);
-      setTimestamps(tsRes.rows ?? []);
+      const [tsRes, mm] = await Promise.all([
+        getTimestamps({ allowStaticFallback }),
+        getModelMetrics({ allowStaticFallback }),
+      ]);
+      if (tsRes.ok !== false) setTimestamps(tsRes.rows ?? []);
+      else console.warn(`${LOG} transport timestamps:`, tsRes.error);
+      if (mm.ok === false) {
+        console.warn(`${LOG} transport model metrics:`, mm.error);
+        return;
+      }
       const names = [...new Set((mm.data?.model_metrics ?? []).map((m) => m.model_name).filter(Boolean))];
       const opts = [...new Set([mm.data?.best_tabular_model, overview?.best_tabular_model, ...names].filter(Boolean))];
       setModels(opts);
       setModel((p) => p || String(opts[0] || ""));
     })();
-  }, [overview?.best_tabular_model]);
+  }, [overview?.best_tabular_model, apiOnline, allowStaticFallback]);
 
   const load = useCallback(async () => {
+    if (apiOnline === null) return;
     setLoading(true);
     try {
       const [sn, bor, ct, wl] = await Promise.all([
-        getDashboardSnapshot({ timestamp: timestamp || undefined, model: model || undefined }),
-        getBoroughTrend(168),
-        getCityTrend(168),
-        getWeatherEventsTimeline(168),
+        getDashboardSnapshot({
+          timestamp: timestamp || undefined,
+          model: model || undefined,
+          allowStaticFallback,
+        }),
+        getBoroughTrend({ hours: 168, allowStaticFallback }),
+        getCityTrend({ hours: 168, allowStaticFallback }),
+        getWeatherEventsTimeline({ hours: 168, allowStaticFallback }),
       ]);
-      setSnapshot(sn.data);
-      setBorough(bor.rows ?? []);
-      setCity(ct.rows ?? []);
-      setWx(wl.rows ?? []);
+      setFetchErrors((prev) => {
+        const n = { ...prev };
+        const touch = (key, res) => {
+          if (res.ok === false) {
+            console.warn(`${LOG} transport panel [${key}]:`, res.error);
+            n[key] = res.error || "Failed";
+          } else delete n[key];
+        };
+        touch("snapshot", sn);
+        touch("borough", bor);
+        touch("city", ct);
+        touch("weather", wl);
+        return n;
+      });
+      if (sn.ok !== false) setSnapshot(sn.data);
+      if (bor.ok !== false) setBorough(bor.rows ?? []);
+      if (ct.ok !== false) setCity(ct.rows ?? []);
+      if (wl.ok !== false) setWx(wl.rows ?? []);
     } finally {
       setLoading(false);
     }
-  }, [timestamp, model]);
+  }, [timestamp, model, apiOnline, allowStaticFallback]);
 
   useEffect(() => {
     load();
@@ -124,6 +157,8 @@ export default function TransportAuthority({ overview, refreshHealth }) {
   useEffect(() => {
     if (!timestamp && defaultTs) setTimestamp(defaultTs);
   }, [defaultTs, timestamp]);
+
+  const showBlocking = loading || apiOnline === null;
 
   const rows = snapshot?.rows ?? [];
 
@@ -210,10 +245,14 @@ export default function TransportAuthority({ overview, refreshHealth }) {
         </GlassButton>
       </PageHeader>
 
-      {loading ? (
+      {showBlocking ? (
         <div className="rounded-xl border border-brand-border bg-white px-4 py-3 text-sm text-brand-muted shadow-card">
           Loading regulator snapshot…
         </div>
+      ) : null}
+
+      {!showBlocking && fetchErrors.snapshot ? (
+        <p className="text-xs text-rose-600">Snapshot: {fetchErrors.snapshot}</p>
       ) : null}
 
       <div className="grid gap-3 xl:grid-cols-4">
@@ -264,6 +303,11 @@ export default function TransportAuthority({ overview, refreshHealth }) {
 
       <div className="grid gap-4 lg:grid-cols-5">
         <SectionCard title="Incident & Disruption Trend" subtitle="Consolidated zone incidents (timeline)" className="lg:col-span-2">
+          {fetchErrors.weather || fetchErrors.city ? (
+            <p className="mb-2 text-xs text-rose-600">
+              {fetchErrors.weather || fetchErrors.city}
+            </p>
+          ) : null}
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={incidentLine}>
@@ -278,6 +322,7 @@ export default function TransportAuthority({ overview, refreshHealth }) {
         </SectionCard>
 
         <SectionCard title="Borough Stress Comparison" subtitle="Latest aligned hour • avg pressure ratio" className="lg:col-span-3">
+          {fetchErrors.borough ? <p className="mb-2 text-xs text-rose-600">{fetchErrors.borough}</p> : null}
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={boroughBars} layout="vertical" margin={{ left: 8 }}>

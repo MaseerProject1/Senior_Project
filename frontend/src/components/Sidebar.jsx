@@ -17,6 +17,11 @@ const icons = {
   data: Database,
 };
 
+function modeLabel(apiOnline) {
+  if (apiOnline === null) return "Checking API…";
+  return apiOnline ? "API Online" : "Exported Data Fallback";
+}
+
 export default function Sidebar({ pages, activePage, setActivePage, apiOnline, lastRefresh }) {
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-gradient-to-b from-brand-deep via-brand-deep to-[#021e19] px-3 pb-5 pt-6 text-[13px] text-white shadow-soft">
@@ -63,13 +68,21 @@ export default function Sidebar({ pages, activePage, setActivePage, apiOnline, l
 
       <div className="mt-4 space-y-2 rounded-xl border border-white/10 bg-brand-mid/25 p-3 text-[11px] leading-snug">
         <div className="flex items-center gap-2 text-white">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+          <span
+            className={`h-2 w-2 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.9)] ${
+              apiOnline === null ? "bg-slate-300" : apiOnline ? "animate-pulse bg-emerald-400" : "bg-amber-300"
+            }`}
+          />
           <span className="font-semibold">
-            Data Status: Ready{apiOnline ? " / API Online" : ""}
+            Data Status: Ready{apiOnline ? " / API Online" : apiOnline === false ? " / Fallback JSON" : ""}
           </span>
         </div>
-        <div className={`font-semibold ${apiOnline ? "text-emerald-300" : "text-amber-200"}`}>
-          Mode: {apiOnline ? "API Online" : "Static Fallback"}
+        <div
+          className={`font-semibold ${
+            apiOnline === null ? "text-white/80" : apiOnline ? "text-emerald-300" : "text-amber-200"
+          }`}
+        >
+          Mode: {modeLabel(apiOnline)}
         </div>
         <div className="text-[10px] text-white/65">
           {lastRefresh ? `Last refresh: ${lastRefresh}` : "Awaiting first refresh ping."}
