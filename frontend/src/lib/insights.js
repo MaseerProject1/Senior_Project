@@ -58,7 +58,7 @@ export function buildInsights(snapshot) {
     title: "Operational priority",
     body: isValidNumber(total)
       ? `Citywide predicted next-hour pickups ≈ ${formatNumber(total, 0)} (waiting-pressure proxy). Review Supply Coverage where ratios stay elevated.`
-      : "Citywide pickup total unavailable for this slice — check API connection or static export.",
+      : "Citywide pickup total unavailable for this slice — check the API connection or choose another snapshot.",
   });
 
   if (!items.length) {
@@ -71,8 +71,8 @@ export function buildInsights(snapshot) {
   return items;
 }
 
-/** Four concise cards for the Main Dashboard right rail (evaluator-friendly copy). */
-export function buildDashboardInsightFourCards(snapshot, filteredRows = []) {
+/** Right-rail insight cards for the Main Dashboard (evaluator-friendly, honest wording). */
+export function buildDashboardInsightRail(snapshot, filteredRows = [], peakBoroughName = null) {
   const rows = filteredRows.length ? filteredRows : snapshot?.rows ?? [];
   const summary = snapshot?.summary ?? {};
 
@@ -81,12 +81,20 @@ export function buildDashboardInsightFourCards(snapshot, filteredRows = []) {
     top != null
       ? {
           title: "Highest demand-pressure zone",
-          body: `${top.zone_name} (${top.borough}) has the highest pressure ratio at ${formatRatio(top.pressure_ratio ?? top.observed_pressure_ratio)} (${pressureLabel(Number(top.pressure_ratio ?? top.observed_pressure_ratio))}).`,
+          body: `${top.zone_name} (${top.borough}) has the highest pressure ratio at ${formatRatio(top.pressure_ratio ?? top.observed_pressure_ratio)} (${pressureLabel(Number(top.pressure_ratio ?? top.observed_pressure_ratio))}). Prioritize visibility into sustained elevated ratios in this zone.`,
         }
       : {
           title: "Highest demand-pressure zone",
-          body: "No pressure ratios available for this filtered view — widen borough scope or verify snapshot exports.",
+          body: "No pressure ratios available for this filtered view — widen borough scope or pick another snapshot timestamp.",
         };
+
+  const peakName = peakBoroughName || null;
+  const card2 = {
+    title: "Peak borough",
+    body: peakName
+      ? `${peakName} has the strongest average demand-pressure ratio in this snapshot view. Monitor elevated zones here versus recent baseline.`
+      : "Borough signal unavailable for the selected snapshot — try another timestamp or widen borough filters.",
+  };
 
   const incidentRows = rows.filter(
     (row) =>
@@ -99,12 +107,12 @@ export function buildDashboardInsightFourCards(snapshot, filteredRows = []) {
       Number(row.disruption_score) > 0
   ).length;
 
-  const card2 = {
-    title: "Incident and disruption context",
+  const card3 = {
+    title: "Incident / disruption context",
     body:
       incidentRows > 0
-        ? `${incidentRows} zone row(s) show incident or disruption-related signals (flags, counts, or disruption score). Use external DOT/NYPD feeds for authoritative incident status.`
-        : "No elevated incident or disruption indicators in this filtered slice — conditions appear comparatively calm in the engineered features.",
+        ? `${incidentRows} zone row(s) show incident or disruption-related signals in engineered features. Track incident context alongside external DOT/NYPD feeds for authoritative status.`
+        : "No elevated incident or disruption indicators in this filtered slice — engineered features appear comparatively calm.",
   };
 
   const weather =
@@ -115,19 +123,19 @@ export function buildDashboardInsightFourCards(snapshot, filteredRows = []) {
   const avgTemp =
     temps.length > 0 ? temps.reduce((a, b) => a + b, 0) / temps.length : null;
 
-  const card3 = {
+  const card4 = {
     title: "Weather signal",
     body:
       weather || isValidNumber(avgTemp)
         ? `${weather ? String(weather) : "Composite weather fields"}${isValidNumber(avgTemp) ? ` • mean temperature ~${formatDecimal(avgTemp, 1)}°C across zones in view` : ""}`
-        : "Weather categories are not populated for this export hour — check weather merge in the training pipeline.",
+        : "Weather categories are not populated for this hour in the active snapshot slice.",
   };
 
-  const card4 = {
+  const card5 = {
     title: "Recommended monitoring",
     body:
-      "Monitor high-pressure zones and align operational review with TLC pickup demand signals and contextual incident features. This dashboard does not observe passenger queue minutes or live driver availability.",
+      "Monitor high-pressure zones, review operational coverage against TLC demand proxies, prioritize visibility where ratios stay elevated, and track incident context using external authoritative sources. This dashboard does not measure passenger waiting time directly and does not reflect live driver availability.",
   };
 
-  return [card1, card2, card3, card4];
+  return [card1, card2, card3, card4, card5];
 }

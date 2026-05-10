@@ -41,8 +41,18 @@ export function pressureLabel(ratio) {
   if (!isValidNumber(ratio)) return "Unavailable";
   const r = Number(ratio);
   if (r >= 1.35) return "High Pressure";
-  if (r >= 1.0) return "Elevated";
-  if (r >= 0.75) return "Typical";
+  if (r >= 1.15) return "Elevated";
+  if (r >= 0.85) return "Typical";
+  return "Low";
+}
+
+/** Short tier labels for tables and map legend alignment (ratio thresholds). */
+export function pressureTierLabel(ratio) {
+  if (!isValidNumber(ratio)) return "N/A";
+  const r = Number(ratio);
+  if (r >= 1.35) return "High";
+  if (r >= 1.15) return "Elevated";
+  if (r >= 0.85) return "Typical";
   return "Low";
 }
 
@@ -50,8 +60,8 @@ export function pressureTone(ratio) {
   if (!isValidNumber(ratio)) return "neutral";
   const r = Number(ratio);
   if (r >= 1.35) return "critical";
-  if (r >= 1.0) return "warning";
-  if (r >= 0.75) return "neutral";
+  if (r >= 1.15) return "warning";
+  if (r >= 0.85) return "neutral";
   return "low";
 }
 

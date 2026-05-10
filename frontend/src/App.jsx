@@ -85,7 +85,7 @@ export default function App() {
       />
       <main className="min-h-screen pl-[240px]">
         <div
-          className={`pointer-events-none fixed right-4 top-5 z-30 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-soft ${
+          className={`pointer-events-none fixed right-5 top-6 z-30 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-wide opacity-95 shadow-soft ${
             badgeApi
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : badgeFallback
@@ -96,7 +96,7 @@ export default function App() {
         >
           {apiOnline === null ? "Checking API…" : badgeApi ? "API Online" : "Exported Data Fallback"}
         </div>
-        <div className="mx-auto max-w-[1600px] px-5 py-7 pb-10">
+        <div className="mx-auto max-w-[1600px] px-5 pt-14 pb-10">
           <ActiveComponent
             pageMeta={{ label: pageCfg?.label ?? "Dashboard", apiOnline }}
             overview={overview}

@@ -6,7 +6,7 @@ import {
   SlidersHorizontal,
   Database,
 } from "lucide-react";
-import brandLogo from "../assets/Maseer_logo.jpg.jpg";
+import brandLogo from "../assets/maseer-logo.jpg";
 
 const icons = {
   dashboard: LayoutDashboard,
@@ -24,7 +24,7 @@ function modeLabel(apiOnline) {
 
 export default function Sidebar({ pages, activePage, setActivePage, apiOnline, lastRefresh }) {
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-gradient-to-b from-brand-deep via-brand-deep to-[#021e19] px-3 pb-5 pt-6 text-[13px] text-white shadow-soft">
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-gradient-to-b from-[#002B24] via-[#003C35] to-[#021e19] px-3 pb-5 pt-6 text-[13px] text-white shadow-soft">
       <div className="mb-8 rounded-xl border border-white/10 bg-brand-mid/30 px-3 py-3">
         <div className="flex items-center gap-2">
           <img
@@ -55,7 +55,7 @@ export default function Sidebar({ pages, activePage, setActivePage, apiOnline, l
               onClick={() => setActivePage(page.id)}
               className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left font-medium transition-colors ${
                 active
-                  ? "bg-brand-primary text-white shadow-md shadow-black/25"
+                  ? "bg-[#DFF7EF] text-[#003C35] shadow-md shadow-black/20 ring-1 ring-[#008B78]/40"
                   : "text-white/92 hover:bg-white/10 hover:text-white"
               }`}
             >
