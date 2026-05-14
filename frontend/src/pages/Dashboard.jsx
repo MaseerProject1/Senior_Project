@@ -51,7 +51,7 @@ import { buildDashboardInsightRail } from "../lib/insights";
 const LOG = "[MASEER]";
 
 const PROJECT_BLURB =
-  "MASEER forecasts next-hour taxi demand pressure across NYC TLC taxi zones using taxi trip records, weather, and event/incident context. It supports monitoring, model comparison, and scenario analysis using demand-pressure proxies.";
+  "MASEER forecasts next-hour taxi demand pressure across NYC TLC taxi zones using taxi trip records, weather, and event/incident context. It supports monitoring, model comparison, and scenario analysis using demand-pressure indicators.";
 
 const TEAM = [
   "Rahaf Saleh Aldhahri",
@@ -749,8 +749,8 @@ export default function Dashboard({ overview, refreshHealth, apiOnline }) {
 
   return (
     <div className="space-y-5 pb-6">
-      <section className="overflow-hidden rounded-2xl border border-brand-border bg-white shadow-card">
-        <div className="grid gap-6 p-6 lg:grid-cols-[1fr_300px] lg:items-start">
+      <section className="mb-6 overflow-hidden rounded-3xl border border-emerald-100/90 bg-gradient-to-br from-white via-brand-mint/35 to-emerald-50/45 p-7 shadow-card ring-1 ring-brand-primary/[0.07]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
           <div>
             <div className="flex flex-wrap items-start gap-4">
               <img
@@ -852,8 +852,9 @@ export default function Dashboard({ overview, refreshHealth, apiOnline }) {
           <div className="text-xs font-bold uppercase tracking-wide text-brand-primary">What does demand pressure mean?</div>
           <p className="mt-1 text-[13px] leading-relaxed text-brand-muted">
             <span className="font-mono text-[11px] text-brand-text">target_pickup_count_next_hour</span> is the next-hour TLC pickup
-            count. Demand-pressure ratio is predicted next-hour pickups divided by the rolling 24-hour pickup mean for the zone — a
-            waiting-pressure / demand-pressure proxy, not observed passenger waiting time.
+            count. Pressure Ratio compares predicted next-hour pickups with the recent 24-hour baseline for the same TLC zone. Higher
+            values indicate stronger demand pressure relative to its recent baseline. This is an indirect demand-pressure
+            indicator, not a direct measurement of passenger waiting time.
           </p>
         </div>
       </div>
@@ -966,7 +967,7 @@ export default function Dashboard({ overview, refreshHealth, apiOnline }) {
               <div className="rounded-xl border border-brand-border bg-gradient-to-br from-brand-mint/50 to-white px-4 py-3 shadow-card">
                 <h3 className="text-sm font-semibold text-brand-text">AI Insights &amp; Recommendations</h3>
                 <p className="mt-1 text-[11px] leading-snug text-brand-muted">
-                  Demand-pressure proxies from TLC pickups — not direct passenger waiting times.
+                  Demand-pressure indicators from TLC pickups — this dashboard does not directly measure passenger waiting time.
                 </p>
               </div>
               <div className="grid max-h-[520px] gap-3 overflow-y-auto pr-1">
