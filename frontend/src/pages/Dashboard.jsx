@@ -750,14 +750,20 @@ export default function Dashboard({ overview, refreshHealth, apiOnline }) {
   return (
     <div className="space-y-5 pb-6">
       <section className="mb-6 overflow-hidden rounded-3xl border border-emerald-100/90 bg-gradient-to-br from-white via-brand-mint/35 to-emerald-50/45 p-7 shadow-card ring-1 ring-brand-primary/[0.07]">
-        <div className="grid gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
+        <div className="grid gap-6 lg:grid-cols-[1fr_minmax(280px,360px)] lg:items-start">
           <div>
             <div className="flex flex-wrap items-start gap-4">
-              <img
-                src={brandLogo}
-                alt="MASEER"
-                className="h-[72px] w-[72px] shrink-0 rounded-2xl object-cover shadow-md ring-2 ring-brand-mint/90"
-              />
+              <div className="relative shrink-0">
+                <span
+                  className="pointer-events-none absolute -inset-[3px] rounded-[1.2rem] bg-brand-primary/[0.06] ring-1 ring-brand-primary/20"
+                  aria-hidden
+                />
+                <img
+                  src={brandLogo}
+                  alt="MASEER"
+                  className="relative z-10 h-[72px] w-[72px] rounded-2xl object-cover shadow-md ring-2 ring-brand-mint/90"
+                />
+              </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-primary">Main Dashboard</p>
                 <h1 className="mt-1 text-2xl font-semibold tracking-tight text-brand-text sm:text-[1.85rem]">
@@ -767,12 +773,19 @@ export default function Dashboard({ overview, refreshHealth, apiOnline }) {
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-brand-border bg-gradient-to-br from-brand-mint/60 to-white p-4 shadow-inner">
-            <div className="text-xs font-bold uppercase tracking-wide text-brand-deep">Team MASEER — Data Science Students</div>
-            <ul className="mt-3 space-y-1.5 text-[13px] leading-snug text-brand-text">
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-100/95 bg-gradient-to-b from-white via-white to-brand-mint/[0.12] p-5 shadow-[0_10px_36px_-16px_rgba(0,139,120,0.16)] ring-1 ring-brand-primary/[0.07] sm:p-6">
+            <div
+              className="pointer-events-none absolute inset-x-8 top-3 h-px rounded-full bg-gradient-to-r from-transparent via-brand-primary/22 to-transparent"
+              aria-hidden
+            />
+            <div className="flex items-center gap-2.5 pt-1">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-primary/35 shadow-[0_0_0_3px_rgba(0,139,120,0.06)]" aria-hidden />
+              <div className="text-xs font-semibold uppercase tracking-wide text-brand-deep">MASEER Team</div>
+            </div>
+            <ul className="mt-5 space-y-2.5 text-[13px] leading-snug text-brand-text">
               {TEAM.map((name) => (
-                <li key={name} className="flex gap-2">
-                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-primary/80" />
+                <li key={name} className="flex gap-2.5 pl-0.5">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-brand-primary/55" />
                   <span className="break-words">{name}</span>
                 </li>
               ))}
