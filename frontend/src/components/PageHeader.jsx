@@ -5,9 +5,10 @@ export default function PageHeader({ title, subtitle, children, footer, showTitl
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2.5">
             {showTitleStatusDot ? (
-              <span className="relative flex h-2.5 w-2.5 shrink-0 items-center justify-center" aria-hidden>
-                <span className="absolute h-3 w-3 rounded-full bg-brand-teal/30 blur-[3px]" />
-                <span className="relative block h-2 w-2 rounded-full bg-brand-teal shadow-[0_0_10px_rgba(0,133,111,0.55),0_0_4px_rgba(0,133,111,0.35)] ring-[3px] ring-brand-primary/15" />
+              <span className="relative flex h-3 w-3 shrink-0 items-center justify-center" aria-hidden>
+                <span className="absolute inline-flex h-2 w-2 rounded-full bg-emerald-400/35 motion-safe:animate-[ping_2.75s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                <span className="absolute h-3 w-3 rounded-full bg-brand-teal/30 blur-[4px] motion-safe:animate-pulse motion-safe:[animation-duration:2.2s]" />
+                <span className="relative block h-2 w-2 rounded-full bg-brand-teal shadow-[0_0_10px_rgba(0,133,111,0.55),0_0_4px_rgba(0,133,111,0.35)] ring-[3px] ring-brand-primary/15 motion-safe:animate-pulse motion-safe:[animation-duration:2.2s]" />
               </span>
             ) : null}
             <h1 className="min-w-0 flex-1 text-xl font-semibold tracking-tight text-brand-text sm:text-[1.65rem] sm:leading-snug">
