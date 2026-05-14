@@ -3,6 +3,11 @@ import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { formatDecimal, formatNumber, formatRatio, pressureTierLabel } from "../lib/format";
 
+function boroughFromFeature(feature, row) {
+  const r = row?.borough ?? feature?.properties?.borough ?? feature?.properties?.Borough;
+  return r != null && String(r).trim() !== "" ? String(r).trim() : null;
+}
+
 function zoneIdFromFeature(feature) {
   const p = feature?.properties ?? {};
   const raw = p.LocationID ?? p.location_id ?? p.zone_id ?? p.objectid ?? p.ObjectID;
@@ -87,7 +92,22 @@ function FitBounds({ geojson }) {
   return null;
 }
 
-export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", loading = false }) {
+function boroughHighlightMatch(highlightBorough, featureBorough) {
+  if (!highlightBorough || String(highlightBorough).toLowerCase() === "all") return true;
+  if (!featureBorough) return false;
+  return String(featureBorough).toLowerCase() === String(highlightBorough).toLowerCase();
+}
+
+export default function TlcZoneMap({
+  geojson,
+  rows = [],
+  mapMetric = "ratio",
+  loading = false,
+  /** When set (not "all"), zones outside this borough are de-emphasized. */
+  highlightBorough = null,
+  /** Optional footer line under the legend (e.g. authority-facing copy). */
+  legendFooter = null,
+}) {
   const gjRef = useRef(null);
   const rowMap = useMemo(() => {
     const m = new Map();
@@ -130,6 +150,8 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
     (feature) => {
       const id = zoneIdFromFeature(feature);
       const row = id != null ? rowMap.get(id) : null;
+      const boro = boroughFromFeature(feature, row);
+      const inFocus = boroughHighlightMatch(highlightBorough, boro);
       let fill = "#f1f5f9";
       if (mapMetric === "pickups") {
         fill = pickupFill(row?.predicted_next_hour_pickups ?? row?.target_pickup_count_next_hour, pickupMax);
@@ -140,12 +162,12 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
       }
       return {
         fillColor: fill,
-        fillOpacity: 0.78,
-        color: "#94a3b8",
-        weight: 0.8,
+        fillOpacity: inFocus ? 0.78 : 0.2,
+        color: inFocus ? "#94a3b8" : "#cbd5e1",
+        weight: inFocus ? 0.8 : 0.35,
       };
     },
-    [rowMap, mapMetric, pickupMax, incidentMax]
+    [rowMap, mapMetric, pickupMax, incidentMax, highlightBorough]
   );
 
   const onEachFeature = useCallback(
@@ -153,9 +175,8 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
       const id = zoneIdFromFeature(feature);
       const row = id != null ? rowMap.get(id) : null;
       const zname = row?.zone_name || feature?.properties?.zone || feature?.properties?.Zone || `Zone ${id ?? "—"}`;
-      const boroughRaw = row?.borough ?? feature?.properties?.borough;
-      const borough =
-        boroughRaw != null && String(boroughRaw).trim() !== "" ? String(boroughRaw) : "N/A";
+      const boroughRaw = boroughFromFeature(feature, row);
+      const borough = boroughRaw ?? "N/A";
       const pred = row?.predicted_next_hour_pickups ?? row?.target_pickup_count_next_hour;
       const roll = row?.pickup_count_roll_mean_24;
       const ratio = row?.pressure_ratio ?? row?.observed_pressure_ratio;
@@ -201,8 +222,8 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
 
   const key = useMemo(() => {
     const n = geojson?.features?.length ?? 0;
-    return `${n}-${rows.length}-${mapMetric}`;
-  }, [geojson, rows.length, mapMetric]);
+    return `${n}-${rows.length}-${mapMetric}-${highlightBorough ?? "all"}`;
+  }, [geojson, rows.length, mapMetric, highlightBorough]);
 
   const legendCaptionDemand =
     "Color shows the selected metric for the selected timestamp. Warmer colors indicate stronger demand pressure or stronger incident context.";
@@ -335,7 +356,7 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
                 <span className="h-4 w-7 shrink-0 rounded border border-brand-border/70 shadow-sm" style={{ background: "#DFF7EF" }} />
                 <span>
                   <span className="font-semibold">Low</span>
-                  <span className="text-brand-muted"> — no or weak incident/disruption signal</span>
+                  <span className="text-brand-muted"> / no signal — no or weak incident/disruption signal</span>
                 </span>
               </span>
               <span className="flex items-center gap-2">
@@ -345,7 +366,7 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
                 />
                 <span>
                   <span className="font-semibold">Elevated</span>
-                  <span className="text-brand-muted"> — incident, closure, or disruption signal is present</span>
+                  <span className="text-brand-muted"> — incident/disruption signal present</span>
                 </span>
               </span>
               <span className="flex items-center gap-2">
@@ -355,13 +376,14 @@ export default function TlcZoneMap({ geojson, rows = [], mapMetric = "ratio", lo
                 />
                 <span>
                   <span className="font-semibold">High</span>
-                  <span className="text-brand-muted"> — stronger disruption-style signal in this view</span>
+                  <span className="text-brand-muted"> — strong disruption signal</span>
                 </span>
               </span>
             </div>
             <p className="text-xs font-medium leading-relaxed text-brand-muted">{legendCaptionDemand}</p>
           </div>
         ) : null}
+        {legendFooter ? <p className="mt-2 text-xs font-medium leading-relaxed text-brand-muted">{legendFooter}</p> : null}
       </div>
     </div>
   );

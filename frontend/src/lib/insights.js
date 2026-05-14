@@ -57,7 +57,7 @@ export function buildInsights(snapshot) {
   items.push({
     title: "Operational priority",
     body: isValidNumber(total)
-      ? `Citywide predicted next-hour pickups ≈ ${formatNumber(total, 0)} (waiting-pressure proxy). Review Supply Coverage where ratios stay elevated.`
+      ? `Citywide predicted next-hour pickups about ${formatNumber(total, 0)} (pickup-demand indicator). Review Supply Coverage where ratios stay elevated.`
       : "Citywide pickup total unavailable for this slice — check the API connection or choose another snapshot.",
   });
 
@@ -134,8 +134,165 @@ export function buildDashboardInsightRail(snapshot, filteredRows = [], peakBorou
   const card5 = {
     title: "Recommended monitoring",
     body:
-      "Monitor high-pressure zones, review operational coverage against TLC demand proxies, prioritize visibility where ratios stay elevated, and track incident context using external authoritative sources. This dashboard does not measure passenger waiting time directly and does not reflect live driver availability.",
+      "Monitor high-pressure zones, review operational coverage against TLC pickup-demand indicators, prioritize visibility where ratios stay elevated, and track incident context using external authoritative sources. This dashboard does not measure passenger waiting time directly and does not reflect live on-street supply conditions.",
   };
 
   return [card1, card2, card3, card4, card5];
+}
+
+export function incidentContextActive(row) {
+  if (!row) return false;
+  return (
+    Number(row.zone_incident_count) > 0 ||
+    Number(row.citywide_incident_count) > 0 ||
+    Number(row.incident_flag) > 0 ||
+    Number(row.event_flag) > 0 ||
+    Number(row.event_active) > 0 ||
+    Number(row.road_closure_flag) > 0 ||
+    Number(row.disruption_score) > 0
+  );
+}
+
+export function summarizeIncidentContext(row) {
+  if (!incidentContextActive(row)) return "No strong signal";
+  const parts = [];
+  if (Number(row.zone_incident_count) > 0) parts.push("Zone incidents");
+  if (Number(row.road_closure_flag) > 0) parts.push("Closure signal");
+  if (Number(row.event_flag) > 0 || Number(row.event_active) > 0) parts.push("Event context");
+  if (Number(row.incident_flag) > 0) parts.push("Incident flag");
+  if (Number(row.disruption_score) > 0) parts.push("Disruption score");
+  return parts.length ? parts.join(" · ") : "Context present";
+}
+
+/** Highest row by pressure ratio, predicted pickups, or incident-style score (for authority map-metric insight). */
+export function getTopAuthorityMetricRow(rows = [], mapMetric = "ratio") {
+  if (!rows.length) return null;
+  if (mapMetric === "pickups") {
+    let best = null;
+    let bestV = -Infinity;
+    for (const row of rows) {
+      const v = Number(row.predicted_next_hour_pickups ?? row.target_pickup_count_next_hour);
+      if (Number.isFinite(v) && v >= bestV) {
+        bestV = v;
+        best = row;
+      }
+    }
+    return best;
+  }
+  if (mapMetric === "incident") {
+    let best = null;
+    let bestS = -Infinity;
+    for (const row of rows) {
+      const s =
+        Number(row.zone_incident_count || 0) +
+        (Number(row.incident_flag) > 0 ? 2 : 0) +
+        (Number(row.road_closure_flag) > 0 ? 1.5 : 0) +
+        Number(row.disruption_score || 0) +
+        (Number(row.event_active) > 0 || Number(row.event_flag) > 0 ? 1 : 0);
+      if (s >= bestS) {
+        bestS = s;
+        best = row;
+      }
+    }
+    return best;
+  }
+  return getTopPressureRow(rows);
+}
+
+/**
+ * Right-rail cards for Transport Authority (regulatory wording only).
+ * @param {"ratio"|"pickups"|"incident"} mapMetric
+ */
+export function buildAuthorityRegulatoryRail(rows, summary, mapMetric, peakBoroughStress) {
+  const top = getTopAuthorityMetricRow(rows, mapMetric);
+  const card1 =
+    top != null
+      ? mapMetric === "pickups"
+        ? {
+            title: "Highest monitoring zone",
+            body: `${top.zone_name ?? "—"} (${top.borough ?? "—"}) shows the strongest predicted pickup-demand signal in view at ${formatNumber(Number(top.predicted_next_hour_pickups ?? top.target_pickup_count_next_hour), 0)} predicted next-hour pickups.`,
+          }
+        : mapMetric === "incident"
+          ? {
+              title: "Highest monitoring zone",
+              body: `${top.zone_name ?? "—"} (${top.borough ?? "—"}) shows the strongest incident/disruption context among zones in this snapshot (${summarizeIncidentContext(top)}).`,
+            }
+          : {
+              title: "Highest monitoring zone",
+              body: `${top.zone_name ?? "—"} (${top.borough ?? "—"}) has the highest demand-pressure ratio at ${formatRatio(top.pressure_ratio ?? top.observed_pressure_ratio)} (${pressureLabel(Number(top.pressure_ratio ?? top.observed_pressure_ratio))}).`,
+            }
+      : {
+          title: "Highest monitoring zone",
+          body: "No comparable zone signal in this filtered view — adjust borough or snapshot.",
+        };
+
+  const pb = peakBoroughStress?.name;
+  const pr = peakBoroughStress?.ratio;
+  const card2 = {
+    title: "Borough stress summary",
+    body:
+      pb && isValidNumber(pr)
+        ? `${pb} shows the strongest average demand-pressure ratio in the latest borough trend slice (~${formatDecimal(pr, 2)}×). Compare with other boroughs in the chart below for planning review.`
+        : "Borough-level average pressure is not available for this selection — check borough trend data.",
+  };
+
+  const incidentRows = rows.filter((row) => incidentContextActive(row)).length;
+  const card3 = {
+    title: "Incident and disruption context",
+    body:
+      incidentRows > 0
+        ? `${incidentRows} zone row(s) include event, incident, closure, or disruption indicators in this snapshot. Use external DOT/NYPD sources for authoritative closure status.`
+        : "Few or no engineered incident or disruption indicators in this snapshot slice.",
+  };
+
+  const weather =
+    summary?.weather_status ||
+    rows.find((r) => r.weather_category)?.weather_category ||
+    null;
+  const temps = rows.map((r) => Number(r.temperature)).filter(isValidNumber);
+  const avgTemp = temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : null;
+  const precips = rows.map((r) => Number(r.precipitation)).filter(isValidNumber);
+  const avgPrecip = precips.length ? precips.reduce((a, b) => a + b, 0) / precips.length : null;
+
+  const card4 = {
+    title: "Weather signal",
+    body:
+      weather || isValidNumber(avgTemp)
+        ? `${weather ? String(weather) : "Composite weather fields"}${isValidNumber(avgTemp) ? ` • mean temperature ~${formatDecimal(avgTemp, 1)}°C` : ""}${isValidNumber(avgPrecip) && avgPrecip > 0 ? ` • mean precipitation ~${formatDecimal(avgPrecip, 2)} mm` : ""}`
+        : "Weather fields are sparse for this snapshot hour.",
+  };
+
+  const card5 = {
+    title: "Planning note",
+    body:
+      "Use these signals to monitor high-pressure zones, review recurring borough-level stress, and support coordination with mobility operators when operational visibility is needed.",
+  };
+
+  return [card1, card2, card3, card4, card5];
+}
+
+export function buildAuthorityMonitoringRecommendations({
+  highPressureCount,
+  incidentContextRows,
+  peakBoroughName,
+  boroughTrendDominant,
+  weatherPresent,
+}) {
+  const lines = [];
+  if (highPressureCount >= 8) {
+    lines.push("Review high-pressure zones and compare them with recurring peak periods.");
+  }
+  if (incidentContextRows >= 3) {
+    lines.push("Cross-check incident-context zones with borough-level stress patterns.");
+  }
+  if (peakBoroughName && boroughTrendDominant && peakBoroughName === boroughTrendDominant) {
+    lines.push(`Prioritize monitoring of ${peakBoroughName} during similar time windows when stress repeats.`);
+  }
+  if (weatherPresent) {
+    lines.push("Consider weather context when interpreting demand pressure.");
+  }
+  if (!lines.length) {
+    lines.push("Continue routine citywide monitoring; revisit if pressure or incident signals strengthen.");
+  }
+  return lines;
 }

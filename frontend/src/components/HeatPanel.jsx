@@ -11,7 +11,7 @@ function cellStyle(ratio) {
 
 export default function HeatPanel({
   rows = [],
-  subtitle = "NYC TLC taxi zones • pressure proxy",
+  subtitle = "NYC TLC taxi zones • demand-pressure indicator",
   onOpenZones,
   expandLabel = false,
   fullGrid = false,
@@ -94,8 +94,9 @@ export default function HeatPanel({
         )}
       </div>
       <p className="mt-3 text-[11px] leading-snug text-brand-muted">
-        Values reflect predicted next-hour pickups vs rolling pickup mean (waiting-pressure proxy). NYC TLC labels do not
-        include observed passenger queue time.
+        Values reflect Pressure Ratio: predicted next-hour pickups vs the rolling 24-hour pickup mean for the zone. This is an
+        indirect demand-pressure indicator, not a direct measurement of passenger waiting time. NYC TLC labels do not include observed
+        passenger queue time.
       </p>
     </div>
   );

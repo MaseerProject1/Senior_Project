@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "mode": "Frontend demo dashboard using exported model artifacts",
   "source_note": "TLC Trip Data • Weather • Events/Incidents",
-  "honesty_note": "The dashboard estimates demand pressure as a waiting-pressure proxy, not direct observed passenger waiting time."
+  "honesty_note": "This dashboard does not directly measure passenger waiting time. It uses demand-pressure indicators derived from predicted pickup demand."
 }

@@ -41,7 +41,7 @@ const LOG = "[MASEER]";
 
 export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
   const subtitle =
-    "Operator-grade demand-pressure telemetry with zone drilling — still a pickup-count proxy without live idle-driver visibility.";
+    "Operator-grade demand-pressure telemetry with zone drilling — still a pickup-demand indicator without live on-street supply telemetry.";
 
   const [zones, setZones] = useState([]);
   const [models, setModels] = useState([]);
@@ -201,7 +201,7 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
     }
     items.push({
       title: `${zoneRow.zone_name} demand pulse`,
-      body: `Pickup proxy ${formatNumber(zoneRow.predicted_next_hour_pickups, 0)} vs roll-mean denominator ${formatDecimal(zoneRow.pickup_count_roll_mean_24, 2)} → ${formatRatio(zoneRow.pressure_ratio)} (${pressureLabel(Number(zoneRow.pressure_ratio))}).`,
+      body: `Pickup-demand indicator: ${formatNumber(zoneRow.predicted_next_hour_pickups, 0)} vs roll-mean denominator ${formatDecimal(zoneRow.pickup_count_roll_mean_24, 2)} → ${formatRatio(zoneRow.pressure_ratio)} (${pressureLabel(Number(zoneRow.pressure_ratio))}).`,
     });
     items.push({
       title: "Review Supply Coverage",
@@ -255,7 +255,7 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Ride-Hailing Ops" subtitle={subtitle}>
+      <PageHeader showTitleStatusDot title="Ride-Hailing Ops" subtitle={subtitle}>
         <SelectField label="Zone" value={zoneId} onChange={setZoneId} options={zoneOpts} />
         <SelectField
           label="Snapshot time"
@@ -302,12 +302,12 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
           accent="teal"
           label="Expected Next-Hour Pickups"
           value={formatNumber(zoneRow?.predicted_next_hour_pickups, 0)}
-          subtext={`TLC Zone ${zoneId || "—"} • waiting-pressure proxy`}
+          subtext={`TLC Zone ${zoneId || "—"} • demand-pressure indicator`}
         />
         <KpiCard
           icon={Gauge}
           accent={Number(zoneRow?.pressure_ratio) >= 1.35 ? "danger" : "warn"}
-          label="Demand Pressure Ratio"
+          label="Pressure Ratio"
           value={zoneRow ? `${formatDecimal(zoneRow.pressure_ratio, 2)}×` : "N/A"}
           subtext="Predicted pickups ÷ 24h rolling mean"
         />
@@ -323,7 +323,7 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
           accent={pressureAlertLabel === "High Pressure" ? "danger" : "neutral"}
           label="Pressure Alert"
           value={pressureAlertLabel}
-          subtext="Proxy banding — not queue minutes"
+          subtext="Demand-pressure indicator banding — not queue minutes"
         />
       </div>
 
@@ -354,7 +354,7 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
           </dl>
         </SectionCard>
 
-        <SectionCard title="Short-Term City Pulse" subtitle="Citywide proxy sum — quick external context">
+        <SectionCard title="Short-Term City Pulse" subtitle="Citywide pickup-demand indicator sum — quick external context">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={pulse}>
@@ -384,7 +384,7 @@ export default function RideHailingOps({ overview, refreshHealth, apiOnline }) {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Line type="monotone" dataKey="pickups" name="Pickups" stroke="#00856f" dot={false} strokeWidth={2} />
-              <Line type="monotone" dataKey="target" name="Next-hour target (proxy)" stroke="#66736d" dot={false} strokeDasharray="5 6" strokeWidth={2} />
+              <Line type="monotone" dataKey="target" name="Next-hour target (pickup-demand indicator)" stroke="#66736d" dot={false} strokeDasharray="5 6" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>

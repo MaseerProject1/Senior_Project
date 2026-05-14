@@ -40,7 +40,7 @@ export default function Sidebar({ pages, activePage, setActivePage, apiOnline, l
           </div>
         </div>
         <p className="mt-2 text-[11px] leading-snug text-white/70">
-          Next-hour pickup demand as a waiting-pressure proxy (TLC zone level).
+          Next-hour pickup demand as a demand-pressure indicator (TLC zone level).
         </p>
       </div>
 

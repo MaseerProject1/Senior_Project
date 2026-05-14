@@ -5,7 +5,7 @@ export default function Footer() {
         <span>Secure • Private • Government Use Only</span>
         <span className="tabular-nums">MASEER v1.0.0</span>
         <span className="text-right">
-          Source: TLC Trip Data • Weather • Events / Incidents (proxy features only)
+          Source: TLC Trip Data • Weather • Events / Incidents (incident-context and weather indicators)
         </span>
       </div>
     </footer>

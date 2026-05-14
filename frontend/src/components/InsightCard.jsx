@@ -18,7 +18,7 @@ export default function InsightCard({
           {title}
         </h3>
         <p className="mt-1 text-[11px] text-brand-muted">
-          Demand-pressure highlights from live snapshot • waiting-pressure proxy labels only
+          Demand-pressure highlights from live snapshot • demand-pressure indicator labels only
         </p>
       </div>
       <ul className="flex flex-1 flex-col gap-2.5 overflow-auto p-4">

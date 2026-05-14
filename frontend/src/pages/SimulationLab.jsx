@@ -37,7 +37,7 @@ function num(val) {
 
 export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
   const subtitle =
-    "Counterfactual weather, disruption, and rolling-demand inputs re-score the next-hour pickup proxy for a single zone — no passenger waiting-time targets.";
+    "Counterfactual weather, disruption, and rolling-demand inputs re-score the next-hour pickup-demand indicator for a single zone — not an observed passenger waiting-time forecast.";
 
   const allowStaticFallback = apiOnline !== true;
 
@@ -198,10 +198,10 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
     ["Timestamp", (d?.timestamp ?? "").slice(0, 19) || "N/A"],
     ["Model", d?.model_name ?? "—"],
     ["Prediction source", d?.prediction_source ?? "—"],
-    ["Baseline pickups (proxy)", formatDecimal(d?.baseline_prediction, 3)],
-    ["Scenario pickups (proxy)", formatDecimal(d?.predicted_next_hour_pickups, 3)],
+    ["Baseline pickups (pickup-demand indicator)", formatDecimal(d?.baseline_prediction, 3)],
+    ["Scenario pickups (pickup-demand indicator)", formatDecimal(d?.predicted_next_hour_pickups, 3)],
     ["Rolling mean denominator", formatDecimal(d?.pickup_count_roll_mean_24, 3)],
-    ["Pressure ratio", d?.pressure_ratio != null ? `${formatDecimal(d?.pressure_ratio, 2)}×` : "N/A"],
+    ["Pressure Ratio", d?.pressure_ratio != null ? `${formatDecimal(d?.pressure_ratio, 2)}×` : "N/A"],
     ["Pressure label", d?.pressure_label ?? "—"],
     ["Held-out actual (optional)", formatDecimal(d?.actual_next_hour_pickups, 3)],
     ["Absolute error", d?.absolute_error != null ? formatDecimal(d.absolute_error, 3) : "N/A"],
@@ -214,7 +214,7 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Simulation Lab" subtitle={subtitle}>
+      <PageHeader showTitleStatusDot title="Simulation Lab" subtitle={subtitle}>
         <SelectField label="Zone" value={zoneId} onChange={setZoneId} options={zoneOpts} />
         <SelectField
           label="Baseline timestamp"
@@ -248,7 +248,7 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
           <Field label="Actual next-hour pickups (eval)" value={actualNext} onChange={setActualNext} helper="Optional: compute absolute error" />
         </div>
         <p className="mt-4 rounded-lg bg-brand-bg px-4 py-2 text-[11px] text-brand-muted">
-          POST <code className="text-brand-text">/api/simulation/run</code> with JSON payload — responses include baseline vs scenario pickup proxy and pressure banding.
+          POST <code className="text-brand-text">/api/simulation/run</code> with JSON payload — responses include baseline vs scenario pickup-demand indicator values and pressure banding.
         </p>
       </SectionCard>
 
@@ -285,7 +285,7 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
               accent="warn"
               label="Absolute Error"
               value={d?.absolute_error != null ? formatDecimal(d.absolute_error, 3) : "N/A"}
-              subtext={`Optional comparison vs observed proxy`}
+              subtext="Optional comparison when held-out actual pickups are provided"
             />
           </div>
 
@@ -293,7 +293,7 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
             <p className="text-sm font-medium leading-relaxed text-brand-text">{d?.recommendation ?? "—"}</p>
           </SectionCard>
 
-          <SectionCard title="Baseline vs Scenario" subtitle="Pickup-count deltas (waiting-pressure proxy axis)">
+          <SectionCard title="Baseline vs Scenario" subtitle="Pickup-count deltas (demand-pressure indicator axis)">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={baselineChart}>
@@ -302,7 +302,7 @@ export default function SimulationLab({ overview, refreshHealth, apiOnline }) {
                   <YAxis domain={["auto", "auto"]} tick={{ fontSize: 11 }} />
                   <Tooltip formatter={(value) => formatDecimal(value, 4)} />
                   <Legend />
-                  <Line type="monotone" dataKey="value" stroke="#00856f" strokeWidth={3} dot={{ r: 5 }} name="Pickup proxy" />
+                  <Line type="monotone" dataKey="value" stroke="#00856f" strokeWidth={3} dot={{ r: 5 }} name="Pickup-demand indicator" />
                 </LineChart>
               </ResponsiveContainer>
             </div>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { formatDecimal, formatNumber, formatRatio, pressureLabel } from "../lib/format";
 
-/** Borough → approximate TLC-style regions inside the canvas (percent). */
+/** Borough → schematic TLC-style regions inside the canvas (percent). */
 const REGIONS = [
   { match: (b) => /bronx/i.test(b || ""), l: 46, t: 6, w: 34, h: 26 },
   { match: (b) => /manhattan/i.test(b || ""), l: 38, t: 30, w: 24, h: 44 },
@@ -102,7 +102,7 @@ export default function ZoneDemandCanvas({
         <div>
           <h4 className="text-sm font-semibold text-brand-text">NYC zone demand — schematic view</h4>
           <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-brand-muted">
-            Each dot approximates a TLC taxi zone placed by borough (not true latitude/longitude).{" "}
+            Each dot represents a TLC taxi zone placed by borough schematically (not true latitude/longitude).{" "}
             <strong className="text-brand-text">Map data source: TLC zone geometry is not bundled in this frontend build</strong> — swap in GeoJSON later for a real choropleth.
           </p>
         </div>

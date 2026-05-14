@@ -3,7 +3,7 @@
   "subtitle": "NYC Taxi Demand Pressure Forecasting",
   "target": "target_pickup_count_next_hour",
   "target_definition": "Next-hour yellow taxi pickup count by NYC TLC taxi zone.",
-  "proxy_note": "Proxy measure; NYC TLC data does not provide a direct passenger waiting-time label.",
+  "proxy_note": "Because the dataset does not contain observed passenger waiting-time labels, the dashboard uses demand-pressure indicators based on predicted pickup demand.",
   "best_tabular_model": "XGBoost",
   "best_forecast_model": "GRU 24H Forecaster",
   "best_test_mae": 0.541201885813283,

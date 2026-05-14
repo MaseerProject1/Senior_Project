@@ -936,8 +936,23 @@ export default function ModelPerformance({ overview: _overview, apiOnline }) {
   return (
     <div className="space-y-6">
       <PageHeader
+        showTitleStatusDot
         title="Model Performance & Comparison"
         subtitle="Evaluate forecasting models for next-hour TLC pickup demand and 24-hour demand projection."
+        footer={
+          <>
+            {metricsRefreshing ? (
+              <p className="text-xs font-semibold text-brand-muted">Updating…</p>
+            ) : null}
+            <p className="text-xs leading-relaxed text-brand-muted">
+              Metrics evaluate pickup-count prediction, not direct passenger waiting-time labels.
+              Target:{" "}
+              <span className="font-medium text-brand-text">target_pickup_count_next_hour</span>{" "}
+              (next-hour TLC pickup demand; demand-pressure analysis, not observed waiting time).
+            </p>
+            <p className="text-xs leading-relaxed text-brand-muted">{groupingExplainer}</p>
+          </>
+        }
       >
         <GlassButton
           variant="primary"
@@ -952,19 +967,6 @@ export default function ModelPerformance({ overview: _overview, apiOnline }) {
           Refresh metrics
         </GlassButton>
       </PageHeader>
-
-      {metricsRefreshing ? (
-        <p className="-mt-2 text-xs font-semibold text-brand-muted">Updating…</p>
-      ) : null}
-
-      <p className="-mt-2 text-xs leading-relaxed text-brand-muted">
-        Metrics evaluate pickup-count prediction, not direct passenger waiting-time labels.
-        Target:{" "}
-        <span className="font-medium text-brand-text">target_pickup_count_next_hour</span>{" "}
-        (next-hour TLC pickup demand; demand-pressure analysis, not observed waiting time).
-      </p>
-
-      <p className="text-xs leading-relaxed text-brand-muted">{groupingExplainer}</p>
 
       {!modelsMetaOk ? (
         <p className="text-xs text-amber-700">

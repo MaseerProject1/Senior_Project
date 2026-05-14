@@ -30,12 +30,12 @@ const PIPE = [
   { title: "Feature Engineering", body: "Temporal + lag features", Icon: Sparkles },
   { title: "Context Integration", body: "Weather + incident composites", Icon: CloudSun },
   { title: "Training", body: "Tabular + sequence artifacts", Icon: Layers },
-  { title: "Dashboard", body: "Proxy visualization & API layering", Icon: Table2 },
+  { title: "Dashboard", body: "Indicator visualization & API layering", Icon: Table2 },
 ];
 
 export default function DataInfo({ refreshHealth, apiOnline }) {
   const subtitle =
-    "Traceability for `target_pickup_count_next_hour` across curated TLC merges — every metric remains a pickup proxy.";
+    "Traceability for `target_pickup_count_next_hour` across curated TLC merges — every metric remains a pickup-demand indicator.";
 
   const [tab, setTab] = useState("overview");
   const [bundle, setBundle] = useState(() => peekCachedDataInfo()?.data ?? null);
@@ -124,7 +124,7 @@ export default function DataInfo({ refreshHealth, apiOnline }) {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Data Info" subtitle={subtitle}>
+      <PageHeader showTitleStatusDot title="Data Info" subtitle={subtitle}>
         <GlassButton
           variant="primary"
           onClick={async () => {
