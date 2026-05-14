@@ -16,6 +16,7 @@ import {
   Area,
 } from "recharts";
 import PageHeader from "../components/PageHeader";
+import AuthorityAlerts from "../components/AuthorityAlerts";
 import KpiCard from "../components/KpiCard";
 import SectionCard from "../components/SectionCard";
 import SelectField from "../components/SelectField";
@@ -39,6 +40,8 @@ import {
   incidentContextActive,
   summarizeIncidentContext,
 } from "../lib/insights";
+import { useStakeholderRole } from "../context/StakeholderRoleContext";
+import { ROLE } from "../lib/roleAccess";
 
 const LOG = "[MASEER]";
 
@@ -261,6 +264,9 @@ function schematicCellClass(ratio) {
 }
 
 export default function TransportAuthority({ overview, refreshHealth, apiOnline }) {
+  const stakeholder = useStakeholderRole();
+  const showRegulatoryAlerts = stakeholder?.role === ROLE.TRANSPORT_AUTHORITY;
+
   const [timestamps, setTimestamps] = useState([]);
   const [models, setModels] = useState([]);
   const [timestamp, setTimestamp] = useState("");
@@ -801,7 +807,10 @@ export default function TransportAuthority({ overview, refreshHealth, apiOnline 
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)] xl:items-stretch">
-        <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-brand-border bg-white shadow-card xl:min-h-[620px]">
+        <section
+          id="authority-zone-map"
+          className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-brand-border bg-white shadow-card xl:min-h-[620px]"
+        >
           <div className="flex flex-shrink-0 flex-col gap-3 border-b border-brand-border px-4 py-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h3 className="text-lg font-semibold text-brand-text">NYC TLC Zone Demand Pressure Map</h3>
@@ -965,6 +974,7 @@ export default function TransportAuthority({ overview, refreshHealth, apiOnline 
       </SectionCard>
 
       <SectionCard
+        id="authority-high-priority-zones"
         title="High-Priority TLC Zones"
         subtitle="Zones ranked by predicted pickups, then pressure ratio and incident/disruption context, for the selected snapshot."
       >
@@ -1192,6 +1202,15 @@ export default function TransportAuthority({ overview, refreshHealth, apiOnline 
           </div>
         </div>
       </section>
+
+      <AuthorityAlerts
+        enabled={showRegulatoryAlerts}
+        fullRows={fullRows}
+        summary={summary}
+        sortedTableRows={sortedTableRows}
+        peakBoroughAvg={peakBoroughAvg}
+        peakBoroughStress={peakBoroughStress}
+      />
     </div>
   );
 }

@@ -22,7 +22,16 @@ function modeLabel(apiOnline) {
   return apiOnline ? "API Online" : "Exported Data Fallback";
 }
 
-export default function Sidebar({ pages, activePage, setActivePage, apiOnline, lastRefresh }) {
+export default function Sidebar({
+  pages,
+  activePage,
+  setActivePage,
+  apiOnline,
+  lastRefresh,
+  userDisplayName,
+  roleLabel,
+  onSwitchRole,
+}) {
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-[240px] flex-col bg-gradient-to-b from-[#002B24] via-[#003C35] to-[#021e19] px-3 pb-5 pt-6 text-[13px] text-white shadow-soft">
       <div className="mb-8 rounded-xl border border-white/10 bg-brand-mid/30 px-3 py-3">
@@ -67,6 +76,27 @@ export default function Sidebar({ pages, activePage, setActivePage, apiOnline, l
       </nav>
 
       <div className="mt-4 space-y-2 rounded-xl border border-white/10 bg-brand-mid/25 p-3 text-[11px] leading-snug">
+        {userDisplayName ? (
+          <div className="min-w-0 border-b border-white/10 pb-2">
+            <div className="truncate text-[13px] font-semibold text-white">{userDisplayName}</div>
+            {roleLabel ? <div className="mt-0.5 text-[10px] font-medium text-emerald-100/95">{roleLabel}</div> : null}
+          </div>
+        ) : roleLabel ? (
+          <div className="flex items-center justify-between gap-2">
+            <span className="rounded-lg border border-white/15 bg-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-100">
+              {roleLabel}
+            </span>
+          </div>
+        ) : null}
+        {onSwitchRole ? (
+          <button
+            type="button"
+            onClick={onSwitchRole}
+            className="w-full rounded-lg border border-white/15 bg-white/5 py-1.5 text-[10px] font-semibold text-white/90 transition-colors hover:bg-white/10"
+          >
+            Switch role / Log out
+          </button>
+        ) : null}
         <div className="flex items-center gap-2 text-white">
           <span
             className={`h-2 w-2 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.9)] ${
